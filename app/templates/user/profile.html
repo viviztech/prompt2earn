@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Profile — PromptEarn{% endblock %}
+{% block content %}
+<div class="max-w-xl mx-auto">
+    <h1 class="text-2xl font-bold text-gray-800 mb-6">My Profile</h1>
+
+    {% if request.query_params.get('updated') %}
+    <div class="bg-green-50 border border-green-200 text-green-700 rounded-xl px-5 py-3 mb-6 text-sm">Profile updated successfully.</div>
+    {% endif %}
+
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+        <div class="flex items-center gap-4 mb-6">
+            <div class="w-16 h-16 bg-brand-700 rounded-full flex items-center justify-center text-2xl font-bold text-white">
+                {{ user.full_name[0].upper() if user.full_name else 'U' }}
+            </div>
+            <div>
+                <h2 class="font-bold text-gray-800 text-lg">{{ user.full_name }}</h2>
+                <p class="text-gray-500 text-sm">{{ user.email }}</p>
+            </div>
+        </div>
+
+        <form method="post" action="/profile/update" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                <input type="text" name="full_name" value="{{ user.full_name or '' }}" required
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-700">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                <input type="tel" name="phone" value="{{ user.phone or '' }}"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-700">
+            </div>
+            <button type="submit" class="bg-brand-700 text-white px-6 py-2.5 rounded-lg font-semibold text-sm hover:bg-brand-800 transition">Save Changes</button>
+        </form>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center">
+            <div class="text-2xl font-bold text-brand-700">{{ balance }}</div>
+            <div class="text-xs text-gray-500 mt-1">Points Balance</div>
+        </div>
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center">
+            <div class="text-sm font-bold text-gray-700">{{ active_sub.plan.display_name if active_sub else 'No Plan' }}</div>
+            <div class="text-xs text-gray-500 mt-1">
+                {% if active_sub %}Expires {{ active_sub.expires_at.strftime('%b %d, %Y') }}{% else %}Subscribe to start earning{% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

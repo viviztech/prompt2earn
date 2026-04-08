@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Reports — Admin{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold text-gray-800 mb-6">Revenue & Analytics</h1>
+
+<div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+    {% for label, value, color in [
+        ('Total Revenue', '₹' ~ total_revenue | int, 'text-emerald-700'),
+        ('Points Awarded', total_points_awarded | int, 'text-brand-700'),
+        ('Points Redeemed', total_redeemed | int, 'text-purple-700'),
+        ('Total Users', total_users, 'text-blue-700'),
+        ('Total Submissions', total_submissions, 'text-gray-700'),
+    ] %}
+    <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 text-center">
+        <div class="text-xl font-bold {{ color }}">{{ value }}</div>
+        <div class="text-xs text-gray-500 mt-1">{{ label }}</div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+    <h2 class="font-bold text-gray-700 mb-4">Monthly Revenue (Last 6 Months)</h2>
+    <div class="space-y-3">
+        {% set max_rev = monthly_revenue | map(attribute='revenue') | max | default(1) %}
+        {% for m in monthly_revenue %}
+        <div class="flex items-center gap-4">
+            <span class="text-sm text-gray-500 w-20">{{ m.month }}</span>
+            <div class="flex-1 bg-gray-100 rounded-full h-5 overflow-hidden">
+                <div class="bg-brand-700 h-5 rounded-full flex items-center justify-end pr-2"
+                    style="width: {{ ((m.revenue / max_rev) * 100) | round | int }}%; min-width: 2%;">
+                    <span class="text-white text-xs font-medium">₹{{ m.revenue | int }}</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

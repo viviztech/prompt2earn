@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Prompts — Admin{% endblock %}
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold text-gray-800">Prompts</h1>
+    <a href="/admin/prompts/new" class="bg-brand-700 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-brand-800">+ New Prompt</a>
+</div>
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <table class="w-full text-sm">
+        <thead class="bg-gray-50">
+            <tr class="text-left text-gray-500 text-xs">
+                <th class="px-4 py-3">Title</th>
+                <th class="px-4 py-3">Category</th>
+                <th class="px-4 py-3">Points</th>
+                <th class="px-4 py-3">Deadline</th>
+                <th class="px-4 py-3">Visible To</th>
+                <th class="px-4 py-3">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in prompts %}
+            <tr class="border-t border-gray-50 hover:bg-gray-50">
+                <td class="px-4 py-3 font-medium">{{ p.title }}</td>
+                <td class="px-4 py-3">{{ p.category.display_name }}</td>
+                <td class="px-4 py-3 text-brand-700 font-bold">{{ p.point_value }}</td>
+                <td class="px-4 py-3 text-gray-500">{{ p.deadline.strftime('%b %d, %Y') }}</td>
+                <td class="px-4 py-3 text-xs">{{ p.visible_to | join(', ') }}</td>
+                <td class="px-4 py-3 flex gap-3">
+                    <a href="/admin/prompts/{{ p.id }}/edit" class="text-brand-700 hover:underline text-xs">Edit</a>
+                    <form method="post" action="/admin/prompts/{{ p.id }}/delete" onsubmit="return confirm('Delete this prompt?')">
+                        <button type="submit" class="text-red-500 hover:underline text-xs">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% if not prompts %}<div class="text-center py-12 text-gray-400">No prompts yet. Create one!</div>{% endif %}
+</div>
+{% endblock %}

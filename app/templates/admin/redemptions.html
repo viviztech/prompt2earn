@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Redemptions — Admin{% endblock %}
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold text-gray-800">Redemption Requests</h1>
+    <div class="flex gap-2">
+        {% for s in ['pending', 'processing', 'completed', 'rejected'] %}
+        <a href="/admin/redemptions?status={{ s }}" class="px-3 py-1.5 rounded-lg text-sm font-medium capitalize
+            {% if status_filter == s %}bg-brand-700 text-white{% else %}bg-white text-gray-600 border border-gray-300 hover:bg-gray-50{% endif %}">{{ s }}</a>
+        {% endfor %}
+    </div>
+</div>
+<div class="space-y-4">
+    {% for r in redemptions %}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+        <div class="flex justify-between items-start mb-3">
+            <div>
+                <p class="font-semibold text-gray-800">{{ r.user.full_name }}</p>
+                <p class="text-sm text-gray-500">{{ r.user.email }}</p>
+            </div>
+            <span class="capitalize text-xs px-2 py-1 rounded-full font-medium
+                {% if r.status == 'completed' %}bg-green-100 text-green-700
+                {% elif r.status == 'rejected' %}bg-red-100 text-red-700
+                {% elif r.status == 'processing' %}bg-blue-100 text-blue-700
+                {% else %}bg-yellow-100 text-yellow-700{% endif %}">{{ r.status }}</span>
+        </div>
+        <div class="grid grid-cols-3 gap-3 text-sm mb-4">
+            <div><span class="text-gray-500 text-xs">Points</span><br><strong>{{ r.points_requested }}</strong></div>
+            <div><span class="text-gray-500 text-xs">Amount</span><br><strong>₹{{ r.amount_inr }}</strong></div>
+            <div><span class="text-gray-500 text-xs">Method</span><br><strong>{{ r.payment_method | replace('_', ' ') | title }}</strong></div>
+        </div>
+        {% if r.payment_method == 'bank_transfer' %}
+        <div class="text-xs bg-gray-50 rounded-lg p-3 mb-3 space-y-1">
+            <p><span class="text-gray-500">Name:</span> {{ r.bank_account_name }}</p>
+            <p><span class="text-gray-500">Account:</span> {{ r.bank_account_number }}</p>
+            <p><span class="text-gray-500">IFSC:</span> {{ r.bank_ifsc }}</p>
+        </div>
+        {% else %}
+        <div class="text-xs bg-gray-50 rounded-lg p-3 mb-3"><span class="text-gray-500">UPI:</span> {{ r.upi_id }}</div>
+        {% endif %}
+
+        {% if r.status == 'pending' %}
+        <div class="flex gap-3">
+            <form method="post" action="/admin/redemptions/{{ r.id }}/approve" class="flex-1">
+                <input type="hidden" name="admin_note" value="Payment processed">
+                <button type="submit" class="w-full bg-green-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-green-700">✅ Mark as Completed</button>
+            </form>
+            <form method="post" action="/admin/redemptions/{{ r.id }}/reject" class="flex-1 flex gap-2">
+                <input type="text" name="admin_note" required placeholder="Rejection reason" class="flex-1 border border-gray-300 rounded-lg px-2 text-xs">
+                <button type="submit" class="bg-red-600 text-white px-3 rounded-lg text-sm font-semibold hover:bg-red-700">Reject</button>
+            </form>
+        </div>
+        {% elif r.admin_note %}
+        <p class="text-xs text-gray-500">Note: {{ r.admin_note }}</p>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="text-center py-12 text-gray-400">No {{ status_filter }} redemption requests.</div>
+    {% endfor %}
+</div>
+{% endblock %}

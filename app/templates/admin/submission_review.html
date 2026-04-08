@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Review Submission — Admin{% endblock %}
+{% block content %}
+<a href="/admin/submissions" class="text-sm text-brand-700 hover:underline mb-4 inline-block">← Back to Submissions</a>
+
+<div class="grid lg:grid-cols-2 gap-6">
+    <!-- File Preview -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <h2 class="font-bold text-gray-700 mb-4">Submitted File</h2>
+        {% if submission.file_type.startswith('image') %}
+        <img src="{{ preview_url }}" alt="Submission" class="rounded-lg max-w-full max-h-96 object-contain mx-auto">
+        {% elif submission.file_type.startswith('video') %}
+        <video controls class="rounded-lg w-full max-h-96"><source src="{{ preview_url }}" type="{{ submission.file_type }}"></video>
+        {% elif submission.file_type.startswith('audio') %}
+        <audio controls class="w-full mt-4"><source src="{{ preview_url }}" type="{{ submission.file_type }}"></audio>
+        {% else %}
+        <a href="{{ preview_url }}" target="_blank" class="text-brand-700 underline text-sm">Download / View File</a>
+        {% endif %}
+        <div class="mt-4 text-xs text-gray-400 space-y-1">
+            <p>File: {{ submission.original_filename }}</p>
+            <p>Type: {{ submission.file_type }}</p>
+            <p>Size: {{ (submission.file_size_bytes / 1024 / 1024) | round(2) }} MB</p>
+        </div>
+    </div>
+
+    <!-- Review Panel -->
+    <div class="space-y-4">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <h2 class="font-bold text-gray-700 mb-3">Submission Details</h2>
+            <div class="space-y-2 text-sm">
+                <div class="flex justify-between"><span class="text-gray-500">User:</span><span class="font-medium">{{ submission.user.full_name }}</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Prompt:</span><span class="font-medium truncate ml-2">{{ submission.prompt.title }}</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Category:</span><span>{{ submission.prompt.category.display_name }}</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Points Value:</span><span class="text-brand-700 font-bold">{{ submission.prompt.point_value }}</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Submitted:</span><span>{{ submission.submitted_at.strftime('%b %d, %Y %I:%M %p') }}</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Status:</span>
+                    <span class="capitalize text-xs px-2 py-1 rounded-full font-medium
+                        {% if submission.status == 'approved' %}bg-green-100 text-green-700
+                        {% elif submission.status == 'rejected' %}bg-red-100 text-red-700
+                        {% else %}bg-yellow-100 text-yellow-700{% endif %}">
+                        {{ submission.status }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        {% if submission.status == 'pending' %}
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <h2 class="font-bold text-gray-700 mb-4">Review Action</h2>
+            <form method="post" action="/admin/submissions/{{ submission.id }}/approve" class="mb-3">
+                <button type="submit" class="w-full bg-green-600 text-white py-3 rounded-xl font-semibold hover:bg-green-700 transition">
+                    ✅ Approve & Award {{ submission.prompt.point_value }} Points
+                </button>
+            </form>
+            <form method="post" action="/admin/submissions/{{ submission.id }}/reject">
+                <textarea name="review_note" required placeholder="Reason for rejection (required)..."
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-red-500 resize-none" rows="3"></textarea>
+                <button type="submit" class="w-full bg-red-600 text-white py-3 rounded-xl font-semibold hover:bg-red-700 transition">
+                    ❌ Reject Submission
+                </button>
+            </form>
+        </div>
+        {% else %}
+        <div class="bg-gray-50 rounded-2xl border border-gray-200 p-5 text-sm text-gray-500">
+            Already reviewed on {{ submission.reviewed_at.strftime('%b %d, %Y') if submission.reviewed_at else 'N/A' }}.
+            {% if submission.review_note %}<p class="mt-2 text-red-600">{{ submission.review_note }}</p>{% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

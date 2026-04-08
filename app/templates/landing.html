@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}PromptEarn — Earn Real Money with AI{% endblock %}
+{% block navbar %}
+<nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16 items-center">
+            <a href="/" class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-brand-700 rounded-lg flex items-center justify-center">
+                    <span class="text-white font-bold text-sm">PE</span>
+                </div>
+                <span class="text-xl font-bold text-brand-700">PromptEarn</span>
+            </a>
+            <div class="flex items-center gap-4">
+                <a href="/auth/login" class="text-sm text-gray-600 hover:text-brand-700 font-medium">Login</a>
+                <a href="/auth/register" class="bg-brand-700 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-brand-800">Get Started</a>
+            </div>
+        </div>
+    </div>
+</nav>
+{% endblock %}
+{% block content %}
+<!-- Hero -->
+<section class="bg-gradient-to-br from-brand-700 to-purple-900 text-white py-20">
+    <div class="max-w-4xl mx-auto text-center px-4">
+        <h1 class="text-4xl md:text-5xl font-extrabold mb-6 leading-tight">Turn AI Skills into<br>Real Earnings</h1>
+        <p class="text-xl text-purple-200 mb-8 max-w-2xl mx-auto">Get daily creative prompts, create AI-powered content, upload your work, and earn real cash — for housewives, students & freelancers.</p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="/auth/register" class="bg-white text-brand-700 px-8 py-3 rounded-xl font-bold text-lg hover:bg-gray-100 transition">Start Earning Today</a>
+            <a href="/subscriptions/plans" class="border-2 border-white text-white px-8 py-3 rounded-xl font-bold text-lg hover:bg-white hover:text-brand-700 transition">View Plans</a>
+        </div>
+    </div>
+</section>
+
+<!-- How it works -->
+<section class="py-16 bg-white">
+    <div class="max-w-5xl mx-auto px-4">
+        <h2 class="text-3xl font-bold text-center text-gray-800 mb-12">How It Works</h2>
+        <div class="grid md:grid-cols-4 gap-8 text-center">
+            {% for step in [
+                ("1", "Subscribe", "Choose a plan that fits your goals and start working immediately."),
+                ("2", "Get Prompts", "Receive daily creative prompts — posters, videos, audio, captions."),
+                ("3", "Create & Upload", "Use any AI tool on your device to create the content and upload it."),
+                ("4", "Earn & Redeem", "Get points when approved. Redeem for real cash to your bank/UPI.")
+            ] %}
+            <div class="flex flex-col items-center">
+                <div class="w-12 h-12 bg-brand-700 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4">{{ step[0] }}</div>
+                <h3 class="font-bold text-gray-800 mb-2">{{ step[1] }}</h3>
+                <p class="text-gray-500 text-sm">{{ step[2] }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Content Types -->
+<section class="py-16 bg-gray-50">
+    <div class="max-w-5xl mx-auto px-4">
+        <h2 class="text-3xl font-bold text-center text-gray-800 mb-12">What You'll Create</h2>
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {% for item in [
+                ("🖼️", "Social Media Posters", "Instagram, Facebook & Twitter visuals"),
+                ("🎬", "Videos & Reels", "Short-form AI-generated video content"),
+                ("🎙️", "Audio & Voiceovers", "Narrations, podcasts, AI voice clips"),
+                ("✍️", "Blog & Captions", "SEO copy, captions, article snippets")
+            ] %}
+            <div class="bg-white rounded-xl p-6 shadow-sm text-center border border-gray-100">
+                <div class="text-4xl mb-3">{{ item[0] }}</div>
+                <h3 class="font-bold text-gray-800 mb-1">{{ item[1] }}</h3>
+                <p class="text-gray-500 text-sm">{{ item[2] }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="py-16 bg-brand-700 text-white text-center">
+    <div class="max-w-2xl mx-auto px-4">
+        <h2 class="text-3xl font-bold mb-4">Ready to Start Earning?</h2>
+        <p class="text-purple-200 mb-8">Join thousands of creators earning real money from home.</p>
+        <a href="/auth/register" class="bg-white text-brand-700 px-10 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition">Register Now — It's Free to Join</a>
+    </div>
+</section>
+{% endblock %}

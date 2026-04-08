@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Subscribed! — PromptEarn{% endblock %}
+{% block content %}
+<div class="max-w-md mx-auto text-center py-16">
+    <div class="text-6xl mb-6">🎉</div>
+    <h1 class="text-3xl font-bold text-gray-800 mb-3">You're Subscribed!</h1>
+    {% if subscription %}
+    <p class="text-gray-500 mb-2">{{ subscription.plan.display_name }} plan</p>
+    <p class="text-sm text-gray-400 mb-8">Active until {{ subscription.expires_at.strftime('%B %d, %Y') }}</p>
+    {% endif %}
+    <a href="/dashboard" class="bg-brand-700 text-white px-8 py-3 rounded-xl font-bold text-lg hover:bg-brand-800 transition">Start Earning Now →</a>
+</div>
+{% endblock %}

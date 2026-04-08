@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Subscription Plans — PromptEarn{% endblock %}
+{% block content %}
+<div class="text-center mb-10">
+    <h1 class="text-3xl font-bold text-gray-800 mb-2">Choose Your Plan</h1>
+    <p class="text-gray-500">Subscribe to start earning. Cancel anytime.</p>
+</div>
+<div class="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+    {% for plan in plans %}
+    <div class="bg-white rounded-2xl shadow-sm border-2 {% if plan.name == 'pro' %}border-brand-700 relative{% else %}border-gray-100{% endif %} p-6 flex flex-col">
+        {% if plan.name == 'pro' %}
+        <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-brand-700 text-white text-xs font-bold px-3 py-1 rounded-full">POPULAR</div>
+        {% endif %}
+        <h2 class="text-xl font-bold text-gray-800 mb-1">{{ plan.display_name }}</h2>
+        <div class="mb-4">
+            <span class="text-3xl font-extrabold text-brand-700">₹{{ plan.price_inr | int }}</span>
+            <span class="text-gray-400 text-sm">/{{ plan.duration_days }} days</span>
+        </div>
+        <ul class="text-sm text-gray-600 space-y-2 mb-6 flex-1">
+            {% for feature in (plan.features or []) %}
+            <li class="flex items-center gap-2"><span class="text-green-500">✓</span>{{ feature }}</li>
+            {% endfor %}
+            {% if plan.point_multiplier > 1 %}
+            <li class="flex items-center gap-2"><span class="text-brand-700">★</span><strong>{{ plan.point_multiplier }}× point multiplier</strong></li>
+            {% endif %}
+        </ul>
+        {% if active_sub and active_sub.plan_id == plan.id %}
+        <div class="bg-green-50 text-green-700 text-center py-2.5 rounded-xl font-semibold text-sm">Current Plan ✓</div>
+        {% elif user %}
+        <button onclick="subscribeTo('{{ plan.id }}')" class="w-full bg-brand-700 text-white py-2.5 rounded-xl font-semibold hover:bg-brand-800 transition text-sm">Subscribe Now</button>
+        {% else %}
+        <a href="/auth/register" class="w-full bg-brand-700 text-white py-2.5 rounded-xl font-semibold hover:bg-brand-800 transition text-sm text-center block">Get Started</a>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+async function subscribeTo(planId) {
+    const res = await fetch('/subscriptions/create-order', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'plan_id=' + planId
+    });
+    if (!res.ok) { alert('Failed to create order. Please try again.'); return; }
+    const data = await res.json();
+
+    const rzp = new Razorpay({
+        key: data.key,
+        amount: data.amount,
+        currency: data.currency,
+        order_id: data.order_id,
+        name: 'PromptEarn',
+        description: data.plan_name,
+        prefill: { name: data.user_name, email: data.user_email },
+        theme: { color: '#7C3AED' },
+        handler: function(response) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/subscriptions/verify';
+            [['razorpay_order_id', response.razorpay_order_id],
+             ['razorpay_payment_id', response.razorpay_payment_id],
+             ['razorpay_signature', response.razorpay_signature],
+             ['plan_id', planId]].forEach(([k, v]) => {
+                const i = document.createElement('input');
+                i.type = 'hidden'; i.name = k; i.value = v;
+                form.appendChild(i);
+            });
+            document.body.appendChild(form);
+            form.submit();
+        }
+    });
+    rzp.open();
+}
+</script>
+{% endblock %}

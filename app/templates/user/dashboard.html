@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — PromptEarn{% endblock %}
+{% block content %}
+<div class="flex gap-2 items-center mb-2">
+    <h1 class="text-2xl font-bold text-gray-800">Today's Prompts</h1>
+    <span class="bg-brand-100 text-brand-700 text-xs font-semibold px-2.5 py-1 rounded-full">{{ active_sub.plan.display_name }}</span>
+</div>
+<p class="text-gray-500 mb-6 text-sm">Complete prompts and earn points. Points = cash!</p>
+
+<!-- Stats bar -->
+<div class="grid grid-cols-3 gap-4 mb-8">
+    <div class="bg-white rounded-xl p-4 shadow-sm text-center border border-gray-100">
+        <div class="text-2xl font-bold text-brand-700">{{ balance }}</div>
+        <div class="text-xs text-gray-500 mt-1">Points Balance</div>
+    </div>
+    <div class="bg-white rounded-xl p-4 shadow-sm text-center border border-gray-100">
+        <div class="text-2xl font-bold text-green-600">{{ submitted_ids|length }}</div>
+        <div class="text-xs text-gray-500 mt-1">Submitted Today</div>
+    </div>
+    <div class="bg-white rounded-xl p-4 shadow-sm text-center border border-gray-100">
+        <div class="text-2xl font-bold text-gray-700">{{ prompts|length }}</div>
+        <div class="text-xs text-gray-500 mt-1">Available Prompts</div>
+    </div>
+</div>
+
+<!-- Prompts Grid -->
+{% if prompts %}
+<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+    {% for prompt in prompts %}
+    {% set is_done = prompt.id in submitted_ids %}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 flex flex-col {% if is_done %}opacity-70{% endif %}">
+        <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-semibold px-2 py-1 rounded-full
+                {% if prompt.category.name == 'poster' %}bg-pink-100 text-pink-700
+                {% elif prompt.category.name == 'video' %}bg-blue-100 text-blue-700
+                {% elif prompt.category.name == 'audio' %}bg-yellow-100 text-yellow-700
+                {% else %}bg-green-100 text-green-700{% endif %}">
+                {{ prompt.category.display_name }}
+            </span>
+            <span class="text-brand-700 font-bold text-sm">+{{ prompt.point_value }} pts</span>
+        </div>
+        <h3 class="font-semibold text-gray-800 mb-2">{{ prompt.title }}</h3>
+        <p class="text-gray-500 text-xs mb-4 flex-1 line-clamp-2">{{ prompt.description }}</p>
+        <div class="flex items-center justify-between">
+            <span class="text-xs text-gray-400">Due: {{ prompt.deadline.strftime('%b %d, %I:%M %p') }}</span>
+            {% if is_done %}
+            <span class="text-green-600 text-xs font-semibold">✓ Submitted</span>
+            {% else %}
+            <a href="/prompts/{{ prompt.id }}" class="bg-brand-700 text-white text-xs px-4 py-2 rounded-lg hover:bg-brand-800 transition font-medium">Start →</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="text-center py-20 text-gray-400">
+    <div class="text-5xl mb-4">🎉</div>
+    <p class="text-lg font-semibold">All caught up! No more prompts for now.</p>
+    <p class="text-sm mt-2">New prompts are added daily. Check back tomorrow!</p>
+</div>
+{% endif %}
+{% endblock %}

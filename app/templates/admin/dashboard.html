@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard — PromptEarn{% endblock %}
+{% block navbar %}
+<nav class="bg-gray-900 text-white shadow sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16 items-center">
+            <a href="/admin/dashboard" class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-brand-700 rounded-lg flex items-center justify-center">
+                    <span class="text-white font-bold text-sm">PE</span>
+                </div>
+                <span class="text-lg font-bold">PromptEarn Admin</span>
+            </a>
+            <div class="flex items-center gap-6 text-sm">
+                <a href="/admin/prompts" class="hover:text-purple-300">Prompts</a>
+                <a href="/admin/submissions" class="hover:text-purple-300">Submissions</a>
+                <a href="/admin/users" class="hover:text-purple-300">Users</a>
+                <a href="/admin/redemptions" class="hover:text-purple-300">Redemptions</a>
+                <a href="/admin/reports" class="hover:text-purple-300">Reports</a>
+                <form method="post" action="/auth/logout" class="inline">
+                    <button class="text-red-400 hover:text-red-300">Logout</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</nav>
+{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold text-gray-800 mb-6">Dashboard Overview</h1>
+<div class="grid grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
+    {% for label, value, color in [
+        ('Total Users', stats.total_users, 'bg-blue-50 text-blue-700'),
+        ('Today Submissions', stats.today_submissions, 'bg-green-50 text-green-700'),
+        ('Pending Review', stats.pending_reviews, 'bg-yellow-50 text-yellow-700'),
+        ('Points This Month', stats.total_points_month, 'bg-purple-50 text-purple-700'),
+        ('Revenue This Month', '₹' ~ stats.revenue_month, 'bg-emerald-50 text-emerald-700'),
+        ('Pending Redemptions', stats.pending_redemptions, 'bg-red-50 text-red-700'),
+    ] %}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+        <p class="text-xs text-gray-500 mb-1">{{ label }}</p>
+        <div class="text-2xl font-bold {{ color }} inline-block px-2 py-0.5 rounded">{{ value }}</div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="font-bold text-gray-700">Recent Submissions</h2>
+        <a href="/admin/submissions" class="text-brand-700 text-sm hover:underline">View All →</a>
+    </div>
+    <table class="w-full text-sm">
+        <thead>
+            <tr class="text-left text-gray-400 text-xs border-b">
+                <th class="pb-2">User</th>
+                <th class="pb-2">Prompt</th>
+                <th class="pb-2">Category</th>
+                <th class="pb-2">Status</th>
+                <th class="pb-2">Time</th>
+                <th class="pb-2"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in recent_submissions %}
+            <tr class="border-b border-gray-50 hover:bg-gray-50">
+                <td class="py-3">{{ s.user.full_name }}</td>
+                <td class="py-3 max-w-xs truncate">{{ s.prompt.title }}</td>
+                <td class="py-3">{{ s.prompt.category.display_name }}</td>
+                <td class="py-3">
+                    <span class="capitalize text-xs px-2 py-1 rounded-full font-medium
+                        {% if s.status == 'approved' %}bg-green-100 text-green-700
+                        {% elif s.status == 'rejected' %}bg-red-100 text-red-700
+                        {% else %}bg-yellow-100 text-yellow-700{% endif %}">
+                        {{ s.status }}
+                    </span>
+                </td>
+                <td class="py-3 text-gray-400">{{ s.submitted_at.strftime('%b %d %I:%M %p') }}</td>
+                <td class="py-3"><a href="/admin/submissions/{{ s.id }}" class="text-brand-700 hover:underline text-xs">Review</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

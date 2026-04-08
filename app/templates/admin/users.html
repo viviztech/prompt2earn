@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Users — Admin{% endblock %}
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold text-gray-800">Users</h1>
+    <form method="get" action="/admin/users" class="flex gap-2">
+        <input type="text" name="search" value="{{ search }}" placeholder="Search by name or email..."
+            class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-700 w-64">
+        <button type="submit" class="bg-brand-700 text-white px-4 py-2 rounded-lg text-sm font-medium">Search</button>
+    </form>
+</div>
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <table class="w-full text-sm">
+        <thead class="bg-gray-50">
+            <tr class="text-left text-gray-500 text-xs">
+                <th class="px-4 py-3">Name</th>
+                <th class="px-4 py-3">Email</th>
+                <th class="px-4 py-3">Phone</th>
+                <th class="px-4 py-3">Status</th>
+                <th class="px-4 py-3">Joined</th>
+                <th class="px-4 py-3">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in users %}
+            <tr class="border-t border-gray-50 hover:bg-gray-50">
+                <td class="px-4 py-3 font-medium">{{ u.full_name }}</td>
+                <td class="px-4 py-3 text-gray-600">{{ u.email }}</td>
+                <td class="px-4 py-3 text-gray-500">{{ u.phone or '—' }}</td>
+                <td class="px-4 py-3">
+                    <span class="text-xs px-2 py-1 rounded-full font-medium
+                        {% if u.is_suspended %}bg-red-100 text-red-700
+                        {% elif u.is_verified %}bg-green-100 text-green-700
+                        {% else %}bg-yellow-100 text-yellow-700{% endif %}">
+                        {% if u.is_suspended %}Suspended{% elif u.is_verified %}Active{% else %}Unverified{% endif %}
+                    </span>
+                </td>
+                <td class="px-4 py-3 text-gray-400">{{ u.created_at.strftime('%b %d, %Y') }}</td>
+                <td class="px-4 py-3">
+                    <a href="/admin/users/{{ u.id }}" class="text-brand-700 hover:underline text-xs font-medium">View</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% if not users %}<div class="text-center py-12 text-gray-400">No users found.</div>{% endif %}
+</div>
+{% if total_pages > 1 %}
+<div class="flex justify-center gap-2 mt-6">
+    {% for p in range(1, total_pages + 1) %}
+    <a href="?search={{ search }}&page={{ p }}" class="px-3 py-1.5 rounded text-sm {% if p == page %}bg-brand-700 text-white{% else %}bg-white text-gray-600 border border-gray-300 hover:bg-gray-50{% endif %}">{{ p }}</a>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}
