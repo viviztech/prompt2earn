@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Payment Under Review — PromptEarn{% endblock %}
+{% block content %}
+<div class="max-w-md mx-auto text-center py-16">
+    <div class="text-6xl mb-6">⏳</div>
+    <h1 class="text-2xl font-bold text-gray-800 mb-3">Payment Under Review</h1>
+    <p class="text-gray-500 mb-6 text-sm">Your payment proof has been submitted. Admin will verify and activate your account within <strong>24 hours</strong>.</p>
+
+    {% if transaction %}
+    <div class="bg-gray-50 rounded-xl border border-gray-200 p-5 text-left text-sm mb-6 space-y-2">
+        <div class="flex justify-between"><span class="text-gray-500">Transaction ID</span><span class="font-mono font-medium">{{ transaction.manual_transaction_id }}</span></div>
+        <div class="flex justify-between"><span class="text-gray-500">Amount</span><span class="font-medium">₹{{ transaction.amount_inr | int }}</span></div>
+        <div class="flex justify-between"><span class="text-gray-500">Submitted</span><span>{{ transaction.created_at.strftime('%b %d, %Y %I:%M %p') }}</span></div>
+        <div class="flex justify-between"><span class="text-gray-500">Status</span>
+            <span class="capitalize text-xs px-2 py-1 rounded-full font-medium
+                {% if transaction.status == 'paid' %}bg-green-100 text-green-700
+                {% elif transaction.status == 'rejected' %}bg-red-100 text-red-700
+                {% else %}bg-yellow-100 text-yellow-700{% endif %}">
+                {% if transaction.status == 'pending_verification' %}Pending Review
+                {% elif transaction.status == 'paid' %}Approved ✓
+                {% else %}{{ transaction.status | title }}{% endif %}
+            </span>
+        </div>
+        {% if transaction.admin_note and transaction.status == 'rejected' %}
+        <div class="pt-2 border-t border-gray-200">
+            <p class="text-red-600 text-xs"><strong>Reason:</strong> {{ transaction.admin_note }}</p>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% if transaction and transaction.status == 'paid' %}
+    <a href="/dashboard" class="bg-brand-700 text-white px-8 py-3 rounded-xl font-bold hover:bg-brand-800 transition">Go to Dashboard →</a>
+    {% elif transaction and transaction.status == 'rejected' %}
+    <a href="/subscriptions/plans" class="bg-brand-700 text-white px-8 py-3 rounded-xl font-bold hover:bg-brand-800 transition">Try Again →</a>
+    {% else %}
+    <a href="/dashboard" class="bg-gray-100 text-gray-700 px-8 py-3 rounded-xl font-semibold hover:bg-gray-200 transition">Back to Home</a>
+    {% endif %}
+</div>
+{% endblock %}

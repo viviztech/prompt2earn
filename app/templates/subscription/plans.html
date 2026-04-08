@@ -3,8 +3,9 @@
 {% block content %}
 <div class="text-center mb-10">
     <h1 class="text-3xl font-bold text-gray-800 mb-2">Choose Your Plan</h1>
-    <p class="text-gray-500">Subscribe to start earning. Cancel anytime.</p>
+    <p class="text-gray-500">Subscribe to start earning. Pay via Razorpay or Manual Transfer.</p>
 </div>
+
 <div class="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
     {% for plan in plans %}
     <div class="bg-white rounded-2xl shadow-sm border-2 {% if plan.name == 'pro' %}border-brand-700 relative{% else %}border-gray-100{% endif %} p-6 flex flex-col">
@@ -24,22 +25,49 @@
             <li class="flex items-center gap-2"><span class="text-brand-700">★</span><strong>{{ plan.point_multiplier }}× point multiplier</strong></li>
             {% endif %}
         </ul>
+
         {% if active_sub and active_sub.plan_id == plan.id %}
         <div class="bg-green-50 text-green-700 text-center py-2.5 rounded-xl font-semibold text-sm">Current Plan ✓</div>
+
         {% elif user %}
-        <button onclick="subscribeTo('{{ plan.id }}')" class="w-full bg-brand-700 text-white py-2.5 rounded-xl font-semibold hover:bg-brand-800 transition text-sm">Subscribe Now</button>
+        <div class="space-y-2">
+            {% if razorpay_enabled %}
+            <button onclick="payWithRazorpay('{{ plan.id }}')"
+                class="w-full bg-brand-700 text-white py-2.5 rounded-xl font-semibold hover:bg-brand-800 transition text-sm flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
+                Pay with Razorpay
+            </button>
+            {% endif %}
+            <a href="/subscriptions/manual/{{ plan.id }}"
+                class="w-full border-2 border-brand-700 text-brand-700 py-2.5 rounded-xl font-semibold hover:bg-brand-50 transition text-sm flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                Manual Payment (UPI/Bank)
+            </a>
+        </div>
+
         {% else %}
         <a href="/auth/register" class="w-full bg-brand-700 text-white py-2.5 rounded-xl font-semibold hover:bg-brand-800 transition text-sm text-center block">Get Started</a>
         {% endif %}
     </div>
     {% endfor %}
 </div>
+
+<!-- Payment method info -->
+<div class="max-w-2xl mx-auto mt-10 bg-blue-50 border border-blue-200 rounded-xl p-5">
+    <h3 class="font-semibold text-blue-800 mb-2 text-sm">💡 Payment Options</h3>
+    <div class="text-sm text-blue-700 space-y-1">
+        <p><strong>Razorpay:</strong> Instant activation via UPI, cards, net banking.</p>
+        <p><strong>Manual Payment:</strong> Transfer via UPI or bank transfer, upload screenshot. Admin activates within 24 hours.</p>
+    </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
+{% if razorpay_enabled %}
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+{% endif %}
 <script>
-async function subscribeTo(planId) {
+async function payWithRazorpay(planId) {
     const res = await fetch('/subscriptions/create-order', {
         method: 'POST',
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
@@ -47,11 +75,10 @@ async function subscribeTo(planId) {
     });
     if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        alert(err.detail || 'Failed to create order. Please try again.');
+        alert(err.detail || 'Failed to create order. Please use Manual Payment.');
         return;
     }
     const data = await res.json();
-
     const rzp = new Razorpay({
         key: data.key,
         amount: data.amount,

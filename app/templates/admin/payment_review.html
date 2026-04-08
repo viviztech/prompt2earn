@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Review Payment — Admin{% endblock %}
+{% block content %}
+<a href="/admin/payments" class="text-sm text-brand-700 hover:underline mb-4 inline-block">← Back to Payments</a>
+
+<div class="grid lg:grid-cols-2 gap-6">
+    <!-- Screenshot -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <h2 class="font-bold text-gray-700 mb-4">Payment Screenshot</h2>
+        {% if screenshot_url %}
+        <img src="{{ screenshot_url }}" alt="Payment Screenshot" class="rounded-xl w-full max-h-96 object-contain border border-gray-100">
+        {% else %}
+        <div class="bg-gray-50 rounded-xl p-10 text-center text-gray-400">
+            <div class="text-4xl mb-2">🖼️</div>
+            <p class="text-sm">No screenshot uploaded</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Details + Actions -->
+    <div class="space-y-4">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <h2 class="font-bold text-gray-700 mb-4">Payment Details</h2>
+            <div class="space-y-3 text-sm">
+                <div class="flex justify-between"><span class="text-gray-500">User</span><span class="font-medium">{{ txn.user.full_name }}</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Email</span><span>{{ txn.user.email }}</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Plan</span><span class="font-medium">{{ txn.plan.display_name if txn.plan else '—' }}</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Amount</span><span class="font-bold text-brand-700">₹{{ txn.amount_inr | int }}</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Transaction ID</span><span class="font-mono bg-gray-50 px-2 py-0.5 rounded text-xs">{{ txn.manual_transaction_id }}</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Submitted</span><span>{{ txn.created_at.strftime('%b %d, %Y %I:%M %p') }}</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Status</span>
+                    <span class="capitalize text-xs px-2 py-1 rounded-full font-medium
+                        {% if txn.status == 'paid' %}bg-green-100 text-green-700
+                        {% elif txn.status == 'rejected' %}bg-red-100 text-red-700
+                        {% else %}bg-yellow-100 text-yellow-700{% endif %}">
+                        {% if txn.status == 'pending_verification' %}Pending Review{% else %}{{ txn.status | title }}{% endif %}
+                    </span>
+                </div>
+                {% if txn.admin_note %}
+                <div class="pt-2 border-t border-gray-100"><span class="text-gray-500">Admin Note</span><p class="mt-1 text-gray-700">{{ txn.admin_note }}</p></div>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if txn.status == 'pending_verification' %}
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <h2 class="font-bold text-gray-700 mb-4">Action</h2>
+            <form method="post" action="/admin/payments/{{ txn.id }}/approve" class="mb-3">
+                <input type="hidden" name="admin_note" value="Payment verified and approved.">
+                <button type="submit" class="w-full bg-green-600 text-white py-3 rounded-xl font-semibold hover:bg-green-700 transition">
+                    ✅ Approve — Activate Subscription
+                </button>
+            </form>
+            <form method="post" action="/admin/payments/{{ txn.id }}/reject">
+                <textarea name="admin_note" required placeholder="Rejection reason (required)..."
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm mb-3 resize-none focus:outline-none focus:ring-2 focus:ring-red-400" rows="2"></textarea>
+                <button type="submit" class="w-full bg-red-600 text-white py-3 rounded-xl font-semibold hover:bg-red-700 transition">
+                    ❌ Reject Payment
+                </button>
+            </form>
+        </div>
+        {% else %}
+        <div class="bg-gray-50 rounded-xl border border-gray-200 p-4 text-sm text-gray-500 text-center">
+            Already reviewed on {{ txn.reviewed_at.strftime('%b %d, %Y') if txn.reviewed_at else 'N/A' }}.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

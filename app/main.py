@@ -18,6 +18,7 @@ from app.routers.admin import users as admin_users
 from app.routers.admin import plans as admin_plans
 from app.routers.admin import redemptions as admin_redemptions
 from app.routers.admin import reports as admin_reports
+from app.routers.admin import payments as admin_payments
 
 settings = get_settings()
 logger = logging.getLogger(__name__)
@@ -49,6 +50,7 @@ app.include_router(admin_users.router, prefix="/admin")
 app.include_router(admin_plans.router, prefix="/admin")
 app.include_router(admin_redemptions.router, prefix="/admin")
 app.include_router(admin_reports.router, prefix="/admin")
+app.include_router(admin_payments.router, prefix="/admin")
 
 
 @app.get("/")
