@@ -9,6 +9,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import logging
 
 from app.config import get_settings
+from app.dependencies import RedirectException
 from app.routers import auth, user, subscription, submissions, points, redemption
 from app.routers.admin import dashboard as admin_dashboard
 from app.routers.admin import prompts as admin_prompts
@@ -26,6 +27,11 @@ limiter = Limiter(key_func=get_remote_address)
 app = FastAPI(title=settings.APP_NAME, debug=settings.DEBUG)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+
+@app.exception_handler(RedirectException)
+async def redirect_exception_handler(request: Request, exc: RedirectException):
+    return RedirectResponse(url=exc.url, status_code=exc.status_code)
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
