@@ -1,10 +1,30 @@
-import boto3
-from botocore.exceptions import ClientError
+import smtplib
+import ssl
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 import logging
 from app.config import get_settings
 
 settings = get_settings()
 logger = logging.getLogger(__name__)
+
+
+def _send_email(to_email: str, subject: str, body_html: str) -> bool:
+    try:
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = subject
+        msg["From"] = settings.MAIL_FROM or settings.MAIL_USERNAME
+        msg["To"] = to_email
+        msg.attach(MIMEText(body_html, "html"))
+
+        context = ssl.create_default_context()
+        with smtplib.SMTP_SSL(settings.MAIL_HOST, settings.MAIL_PORT, context=context) as server:
+            server.login(settings.MAIL_USERNAME, settings.MAIL_PASSWORD)
+            server.sendmail(settings.MAIL_USERNAME, to_email, msg.as_string())
+        return True
+    except Exception as e:
+        logger.error(f"Email send failed to {to_email}: {e}")
+        return False
 
 
 def send_otp_email(to_email: str, otp: str, full_name: str = "User") -> bool:
@@ -25,30 +45,7 @@ def send_otp_email(to_email: str, otp: str, full_name: str = "User") -> bool:
     </body>
     </html>
     """
-    body_text = f"Your {settings.APP_NAME} verification code is: {otp}. It expires in 10 minutes."
-
-    try:
-        client = boto3.client(
-            "ses",
-            region_name=settings.AWS_REGION,
-            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-        )
-        client.send_email(
-            Source=settings.AWS_SES_FROM_EMAIL,
-            Destination={"ToAddresses": [to_email]},
-            Message={
-                "Subject": {"Data": subject, "Charset": "UTF-8"},
-                "Body": {
-                    "Html": {"Data": body_html, "Charset": "UTF-8"},
-                    "Text": {"Data": body_text, "Charset": "UTF-8"},
-                },
-            },
-        )
-        return True
-    except ClientError as e:
-        logger.error(f"SES send failed: {e.response['Error']['Message']}")
-        return False
+    return _send_email(to_email, subject, body_html)
 
 
 def send_approval_email(to_email: str, full_name: str, prompt_title: str, points: int) -> bool:
@@ -67,25 +64,7 @@ def send_approval_email(to_email: str, full_name: str, prompt_title: str, points
     </body>
     </html>
     """
-    try:
-        client = boto3.client(
-            "ses",
-            region_name=settings.AWS_REGION,
-            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-        )
-        client.send_email(
-            Source=settings.AWS_SES_FROM_EMAIL,
-            Destination={"ToAddresses": [to_email]},
-            Message={
-                "Subject": {"Data": subject, "Charset": "UTF-8"},
-                "Body": {"Html": {"Data": body_html, "Charset": "UTF-8"}},
-            },
-        )
-        return True
-    except ClientError as e:
-        logger.error(f"SES send failed: {e.response['Error']['Message']}")
-        return False
+    return _send_email(to_email, subject, body_html)
 
 
 def send_rejection_email(to_email: str, full_name: str, prompt_title: str, reason: str) -> bool:
@@ -104,22 +83,4 @@ def send_rejection_email(to_email: str, full_name: str, prompt_title: str, reaso
     </body>
     </html>
     """
-    try:
-        client = boto3.client(
-            "ses",
-            region_name=settings.AWS_REGION,
-            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-        )
-        client.send_email(
-            Source=settings.AWS_SES_FROM_EMAIL,
-            Destination={"ToAddresses": [to_email]},
-            Message={
-                "Subject": {"Data": subject, "Charset": "UTF-8"},
-                "Body": {"Html": {"Data": body_html, "Charset": "UTF-8"}},
-            },
-        )
-        return True
-    except ClientError as e:
-        logger.error(f"SES send failed: {e.response['Error']['Message']}")
-        return False
+    return _send_email(to_email, subject, body_html)

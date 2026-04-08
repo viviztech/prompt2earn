@@ -22,7 +22,12 @@ class Settings(BaseSettings):
     AWS_SECRET_ACCESS_KEY: str = ""
     AWS_S3_BUCKET: str = "prompt-to-earn-submissions"
     AWS_REGION: str = "ap-south-1"
-    AWS_SES_FROM_EMAIL: str = "noreply@example.com"
+
+    MAIL_HOST: str = "smtp.gmail.com"
+    MAIL_PORT: int = 465
+    MAIL_USERNAME: str = ""
+    MAIL_PASSWORD: str = ""
+    MAIL_FROM: str = ""
 
     MINIMUM_REDEMPTION_POINTS: int = 500
     POINTS_PER_INR: int = 1
