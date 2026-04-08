@@ -27,4 +27,4 @@ class User(Base):
     submissions = relationship("Submission", back_populates="user", lazy="dynamic", foreign_keys="Submission.user_id")
     points_ledger = relationship("PointsLedger", back_populates="user", lazy="dynamic")
     redemption_requests = relationship("RedemptionRequest", back_populates="user", lazy="dynamic", foreign_keys="RedemptionRequest.user_id")
-    payments = relationship("PaymentTransaction", back_populates="user", lazy="dynamic")
+    payments = relationship("PaymentTransaction", back_populates="user", foreign_keys="PaymentTransaction.user_id", lazy="dynamic")
