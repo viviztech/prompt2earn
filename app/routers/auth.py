@@ -106,10 +106,11 @@ async def verify_otp(
     access_token = create_access_token(str(user.id))
     refresh_token = create_refresh_token(str(user.id))
 
+    is_https = request.url.scheme == "https"
     response = RedirectResponse(url="/subscriptions/plans", status_code=302)
     response.delete_cookie("pending_user_id")
-    response.set_cookie("access_token", access_token, httponly=True, samesite="lax", secure=not settings.DEBUG)
-    response.set_cookie("refresh_token", refresh_token, httponly=True, samesite="lax", secure=not settings.DEBUG, max_age=60*60*24*7)
+    response.set_cookie("access_token", access_token, httponly=True, samesite="lax", secure=is_https)
+    response.set_cookie("refresh_token", refresh_token, httponly=True, samesite="lax", secure=is_https, max_age=60*60*24*7)
     return response
 
 
@@ -171,10 +172,11 @@ async def login(
     access_token = create_access_token(str(user.id))
     refresh_token = create_refresh_token(str(user.id))
 
+    is_https = request.url.scheme == "https"
     redirect_url = "/admin/dashboard" if user.role == "admin" else "/dashboard"
     response = RedirectResponse(url=redirect_url, status_code=302)
-    response.set_cookie("access_token", access_token, httponly=True, samesite="lax", secure=not settings.DEBUG)
-    response.set_cookie("refresh_token", refresh_token, httponly=True, samesite="lax", secure=not settings.DEBUG, max_age=60*60*24*7)
+    response.set_cookie("access_token", access_token, httponly=True, samesite="lax", secure=is_https)
+    response.set_cookie("refresh_token", refresh_token, httponly=True, samesite="lax", secure=is_https, max_age=60*60*24*7)
     return response
 
 
