@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block navbar %}
+<nav class="bg-gray-900 text-white shadow sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16 items-center">
+            <a href="/admin/dashboard" class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-brand-700 rounded-lg flex items-center justify-center">
+                    <span class="text-white font-bold text-sm">PE</span>
+                </div>
+                <span class="text-lg font-bold">PromptEarn Admin</span>
+            </a>
+            <div class="flex items-center gap-6 text-sm">
+                <a href="/admin/prompts" class="hover:text-purple-300 {% if active_nav == 'prompts' %}text-purple-300 font-semibold{% endif %}">Prompts</a>
+                <a href="/admin/submissions" class="hover:text-purple-300 {% if active_nav == 'submissions' %}text-purple-300 font-semibold{% endif %}">Submissions</a>
+                <a href="/admin/users" class="hover:text-purple-300 {% if active_nav == 'users' %}text-purple-300 font-semibold{% endif %}">Users</a>
+                <a href="/admin/payments" class="hover:text-purple-300 {% if active_nav == 'payments' %}text-purple-300 font-semibold{% endif %}">Payments</a>
+                <a href="/admin/redemptions" class="hover:text-purple-300 {% if active_nav == 'redemptions' %}text-purple-300 font-semibold{% endif %}">Redemptions</a>
+                <a href="/admin/reports" class="hover:text-purple-300 {% if active_nav == 'reports' %}text-purple-300 font-semibold{% endif %}">Reports</a>
+                <form method="post" action="/auth/logout" class="inline">
+                    <button class="text-red-400 hover:text-red-300">Logout</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</nav>
+{% endblock %}
