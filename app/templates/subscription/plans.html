@@ -45,7 +45,11 @@ async function subscribeTo(planId) {
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: 'plan_id=' + planId
     });
-    if (!res.ok) { alert('Failed to create order. Please try again.'); return; }
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        alert(err.detail || 'Failed to create order. Please try again.');
+        return;
+    }
     const data = await res.json();
 
     const rzp = new Razorpay({

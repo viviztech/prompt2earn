@@ -1,9 +1,12 @@
 import json
+import logging
 from datetime import datetime, timedelta
 from fastapi import APIRouter, Request, Depends, HTTPException, Form
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
+
+logger = logging.getLogger(__name__)
 
 from app.database import get_db
 from app.dependencies import get_current_user
@@ -53,7 +56,14 @@ async def create_payment_order(
     if not plan:
         raise HTTPException(status_code=404, detail="Plan not found")
 
-    order_data = create_order(plan.price_inr, str(current_user.id), str(plan.id))
+    if not settings.RAZORPAY_KEY_ID or settings.RAZORPAY_KEY_ID == "rzp_test_placeholder":
+        raise HTTPException(status_code=503, detail="Payment gateway not configured. Please contact support.")
+
+    try:
+        order_data = create_order(plan.price_inr, str(current_user.id), str(plan.id))
+    except Exception as e:
+        logger.error(f"Razorpay order creation failed: {e}")
+        raise HTTPException(status_code=502, detail="Payment gateway error. Please try again later.")
 
     txn = PaymentTransaction(
         user_id=current_user.id,
