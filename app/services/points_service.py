@@ -72,6 +72,7 @@ def _update_streak(user, db: Session):
 
 
 def award_points(submission_id, db: Session) -> int:
+    from app.services.settings_service import get_setting_int
     submission = db.query(Submission).filter(Submission.id == submission_id).first()
     if not submission:
         raise ValueError("Submission not found")
@@ -80,6 +81,9 @@ def award_points(submission_id, db: Session) -> int:
     multiplier = float(sub.plan.point_multiplier) if sub else 1.0
     points = int(submission.prompt.point_value * multiplier)
 
+    expiry_days = get_setting_int("points_expiry_days", db) or settings.POINTS_EXPIRY_DAYS
+    expires_at = datetime.utcnow() + timedelta(days=expiry_days)
+
     _add_ledger(
         user_id=submission.user_id,
         points=points,
@@ -87,7 +91,7 @@ def award_points(submission_id, db: Session) -> int:
         description=f"Approved: {submission.prompt.title}",
         db=db,
         submission_id=submission.id,
-        expires_at=_default_expiry(),
+        expires_at=expires_at,
     )
     submission.points_awarded = points
     submission.status = "approved"
@@ -100,26 +104,28 @@ def award_points(submission_id, db: Session) -> int:
 
         # Welcome bonus — one-time on first ever approval
         if not user.welcome_bonus_paid:
+            welcome_pts = get_setting_int("welcome_bonus_points", db) or 10
             _add_ledger(
                 user_id=user.id,
-                points=10,
+                points=welcome_pts,
                 transaction_type="bonus",
-                description="Welcome bonus — first submission approved!",
+                description=f"🎉 Welcome bonus — first submission approved!",
                 db=db,
-                expires_at=_default_expiry(),
+                expires_at=expires_at,
             )
             user.welcome_bonus_paid = True
 
         # Weekly streak bonus (every 7th consecutive day)
         streak = user.current_streak or 0
         if streak > 0 and streak % 7 == 0:
+            streak_pts = get_setting_int("weekly_streak_bonus_points", db) or 20
             _add_ledger(
                 user_id=user.id,
-                points=20,
+                points=streak_pts,
                 transaction_type="bonus",
                 description=f"🔥 {streak}-day streak bonus!",
                 db=db,
-                expires_at=_default_expiry(),
+                expires_at=expires_at,
             )
 
     db.commit()

@@ -63,8 +63,8 @@ def daily_completion_bonus_job():
                 Submission.status.in_(["pending", "approved"]),
             ).count()
 
-            # Check per-plan submission cap — user must have used all their slots
-            max_daily = getattr(sub.plan, "max_daily_submissions", 2)
+            # Check per-plan submission cap
+            max_daily = getattr(sub.plan, "max_daily_submissions", 2) or 2
             accessible_prompts = [
                 p for p in active_prompts_yesterday
                 if not p.visible_to or sub.plan.name in p.visible_to
@@ -116,6 +116,10 @@ def monthly_streak_bonus_job():
             UserSubscription.status == "active",
         ).all()
 
+        from app.services.settings_service import get_setting_int
+        threshold = get_setting_int("monthly_streak_threshold", db) or 25
+        monthly_bonus = get_setting_int("monthly_streak_bonus_points", db) or 50
+
         awarded = 0
         for sub in active_subs:
             # Count distinct active days last month
@@ -128,7 +132,7 @@ def monthly_streak_bonus_job():
                 Submission.status.in_(["pending", "approved"]),
             ).scalar() or 0
 
-            if active_days >= 25:
+            if active_days >= threshold:
                 # Check not already awarded
                 already = db.query(PointsLedger).filter(
                     PointsLedger.user_id == sub.user_id,
@@ -137,7 +141,7 @@ def monthly_streak_bonus_job():
                     PointsLedger.created_at >= month_end - timedelta(days=5),
                 ).first()
                 if not already:
-                    award_daily_completion_bonus(sub.user_id, 50, db)
+                    award_daily_completion_bonus(sub.user_id, monthly_bonus, db)
                     # Rewrite description for monthly
                     from app.models.points import PointsLedger as PL
                     last = db.query(PL).filter(

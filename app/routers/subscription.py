@@ -16,6 +16,7 @@ from app.models.payment import PaymentTransaction
 from app.services.razorpay_service import create_order, verify_payment_signature, verify_webhook_signature
 from app.services.s3_service import get_s3_client
 from app.services.points_service import award_referral_bonus
+from app.services.settings_service import get_setting
 from app.config import get_settings
 
 router = APIRouter(prefix="/subscriptions", tags=["subscription"])
@@ -83,11 +84,6 @@ async def plans_page(request: Request, db: Session = Depends(get_db)):
         "active_sub": active_sub,
         "razorpay_key": settings.RAZORPAY_KEY_ID if razorpay_enabled else "",
         "razorpay_enabled": razorpay_enabled,
-        "manual_upi_id": settings.MANUAL_UPI_ID,
-        "manual_bank_name": settings.MANUAL_BANK_NAME,
-        "manual_bank_account": settings.MANUAL_BANK_ACCOUNT,
-        "manual_bank_ifsc": settings.MANUAL_BANK_IFSC,
-        "manual_account_name": settings.MANUAL_ACCOUNT_NAME,
     })
 
 
@@ -268,11 +264,11 @@ async def manual_payment_page(
         "request": request,
         "user": current_user,
         "plan": plan,
-        "upi_id": settings.MANUAL_UPI_ID,
-        "bank_name": settings.MANUAL_BANK_NAME,
-        "bank_account": settings.MANUAL_BANK_ACCOUNT,
-        "bank_ifsc": settings.MANUAL_BANK_IFSC,
-        "account_name": settings.MANUAL_ACCOUNT_NAME,
+        "upi_id": get_setting("manual_upi_id", db) or settings.MANUAL_UPI_ID,
+        "bank_name": get_setting("manual_bank_name", db) or settings.MANUAL_BANK_NAME,
+        "bank_account": get_setting("manual_bank_account", db) or settings.MANUAL_BANK_ACCOUNT,
+        "bank_ifsc": get_setting("manual_bank_ifsc", db) or settings.MANUAL_BANK_IFSC,
+        "account_name": get_setting("manual_account_name", db) or settings.MANUAL_ACCOUNT_NAME,
     })
 
 
@@ -300,11 +296,11 @@ async def submit_manual_payment(
             "request": request,
             "user": current_user,
             "plan": plan,
-            "upi_id": settings.MANUAL_UPI_ID,
-            "bank_name": settings.MANUAL_BANK_NAME,
-            "bank_account": settings.MANUAL_BANK_ACCOUNT,
-            "bank_ifsc": settings.MANUAL_BANK_IFSC,
-            "account_name": settings.MANUAL_ACCOUNT_NAME,
+            "upi_id": get_setting("manual_upi_id", db) or settings.MANUAL_UPI_ID,
+            "bank_name": get_setting("manual_bank_name", db) or settings.MANUAL_BANK_NAME,
+            "bank_account": get_setting("manual_bank_account", db) or settings.MANUAL_BANK_ACCOUNT,
+            "bank_ifsc": get_setting("manual_bank_ifsc", db) or settings.MANUAL_BANK_IFSC,
+            "account_name": get_setting("manual_account_name", db) or settings.MANUAL_ACCOUNT_NAME,
             "error": "You already have a pending payment verification. Please wait for admin approval.",
         }, status_code=400)
 
@@ -315,11 +311,11 @@ async def submit_manual_payment(
             "request": request,
             "user": current_user,
             "plan": plan,
-            "upi_id": settings.MANUAL_UPI_ID,
-            "bank_name": settings.MANUAL_BANK_NAME,
-            "bank_account": settings.MANUAL_BANK_ACCOUNT,
-            "bank_ifsc": settings.MANUAL_BANK_IFSC,
-            "account_name": settings.MANUAL_ACCOUNT_NAME,
+            "upi_id": get_setting("manual_upi_id", db) or settings.MANUAL_UPI_ID,
+            "bank_name": get_setting("manual_bank_name", db) or settings.MANUAL_BANK_NAME,
+            "bank_account": get_setting("manual_bank_account", db) or settings.MANUAL_BANK_ACCOUNT,
+            "bank_ifsc": get_setting("manual_bank_ifsc", db) or settings.MANUAL_BANK_IFSC,
+            "account_name": get_setting("manual_account_name", db) or settings.MANUAL_ACCOUNT_NAME,
             "error": "Screenshot must be a JPG, PNG, or WebP image.",
         }, status_code=400)
 

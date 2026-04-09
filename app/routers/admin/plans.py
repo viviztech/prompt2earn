@@ -23,6 +23,7 @@ async def list_plans(
         "request": request,
         "user": current_user,
         "plans": plans,
+        "saved": request.query_params.get("saved"),
     })
 
 
@@ -34,6 +35,10 @@ async def update_plan(
     price_inr: str = Form(...),
     duration_days: int = Form(...),
     point_multiplier: str = Form(...),
+    max_daily_submissions: int = Form(...),
+    referral_bonus_points: int = Form(...),
+    daily_completion_bonus: int = Form(...),
+    company_profit_pct: str = Form(...),
     current_user=Depends(require_admin),
     db: Session = Depends(get_db),
 ):
@@ -43,5 +48,9 @@ async def update_plan(
         plan.price_inr = Decimal(price_inr)
         plan.duration_days = duration_days
         plan.point_multiplier = Decimal(point_multiplier)
+        plan.max_daily_submissions = max_daily_submissions
+        plan.referral_bonus_points = referral_bonus_points
+        plan.daily_completion_bonus = daily_completion_bonus
+        plan.company_profit_pct = Decimal(company_profit_pct)
         db.commit()
-    return RedirectResponse(url="/admin/plans", status_code=302)
+    return RedirectResponse(url="/admin/plans?saved=1", status_code=302)
