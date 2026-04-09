@@ -29,6 +29,7 @@ async def list_redemptions(
     redemptions = query.order_by(RedemptionRequest.created_at.asc()).offset(offset).limit(page_size).all()
     total = query.count()
     return templates.TemplateResponse("admin/redemptions.html", {
+        "active_nav": "redemptions",
         "request": request,
         "user": current_user,
         "redemptions": redemptions,

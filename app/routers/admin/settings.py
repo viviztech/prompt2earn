@@ -34,6 +34,7 @@ async def settings_page(
     }
 
     return templates.TemplateResponse("admin/settings.html", {
+        "active_nav": "settings",
         "request": request,
         "user": current_user,
         "groups": groups,

@@ -20,6 +20,7 @@ async def list_plans(
 ):
     plans = db.query(SubscriptionPlan).order_by(SubscriptionPlan.price_inr).all()
     return templates.TemplateResponse("admin/plans.html", {
+        "active_nav": "plans",
         "request": request,
         "user": current_user,
         "plans": plans,

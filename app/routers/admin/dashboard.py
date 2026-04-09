@@ -45,6 +45,7 @@ async def admin_dashboard(
     recent_submissions = db.query(Submission).order_by(Submission.submitted_at.desc()).limit(10).all()
 
     return templates.TemplateResponse("admin/dashboard.html", {
+        "active_nav": "dashboard",
         "request": request,
         "user": current_user,
         "stats": {

@@ -34,6 +34,7 @@ async def list_manual_payments(
     transactions = query.order_by(PaymentTransaction.created_at.asc()).offset(offset).limit(page_size).all()
     total = query.count()
     return templates.TemplateResponse("admin/payments.html", {
+        "active_nav": "payments",
         "request": request,
         "user": current_user,
         "transactions": transactions,
@@ -55,6 +56,7 @@ async def view_manual_payment(
         raise HTTPException(status_code=404, detail="Transaction not found")
     screenshot_url = create_presigned_get_url(txn.manual_screenshot_url) if txn.manual_screenshot_url else None
     return templates.TemplateResponse("admin/payment_review.html", {
+        "active_nav": "payments",
         "request": request,
         "user": current_user,
         "txn": txn,

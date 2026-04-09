@@ -31,6 +31,7 @@ async def list_submissions(
     submissions = query.order_by(Submission.submitted_at.asc()).offset(offset).limit(page_size).all()
     total = query.count()
     return templates.TemplateResponse("admin/submissions.html", {
+        "active_nav": "submissions",
         "request": request,
         "user": current_user,
         "submissions": submissions,
@@ -52,6 +53,7 @@ async def view_submission(
         raise HTTPException(status_code=404, detail="Submission not found")
     preview_url = create_presigned_get_url(submission.file_url, expiry_seconds=900)
     return templates.TemplateResponse("admin/submission_review.html", {
+        "active_nav": "submissions",
         "request": request,
         "user": current_user,
         "submission": submission,

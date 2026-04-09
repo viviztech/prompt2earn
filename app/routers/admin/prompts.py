@@ -24,6 +24,7 @@ async def list_prompts(
     prompts = db.query(Prompt).order_by(Prompt.created_at.desc()).offset(offset).limit(page_size).all()
     total = db.query(Prompt).count()
     return templates.TemplateResponse("admin/prompts.html", {
+        "active_nav": "prompts",
         "request": request,
         "user": current_user,
         "prompts": prompts,
@@ -40,6 +41,7 @@ async def new_prompt_page(
 ):
     categories = db.query(PromptCategory).filter(PromptCategory.is_active == True).all()
     return templates.TemplateResponse("admin/prompt_form.html", {
+        "active_nav": "prompts",
         "request": request,
         "user": current_user,
         "categories": categories,
@@ -87,6 +89,7 @@ async def edit_prompt_page(
         raise HTTPException(status_code=404, detail="Prompt not found")
     categories = db.query(PromptCategory).filter(PromptCategory.is_active == True).all()
     return templates.TemplateResponse("admin/prompt_form.html", {
+        "active_nav": "prompts",
         "request": request,
         "user": current_user,
         "prompt": prompt,

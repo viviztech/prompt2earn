@@ -147,6 +147,7 @@ async def reports(
         })
 
     return templates.TemplateResponse("admin/reports.html", {
+        "active_nav": "reports",
         "request": request,
         "user": current_user,
         # Revenue

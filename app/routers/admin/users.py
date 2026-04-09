@@ -31,6 +31,7 @@ async def list_users(
     users = query.order_by(User.created_at.desc()).offset(offset).limit(page_size).all()
     total = query.count()
     return templates.TemplateResponse("admin/users.html", {
+        "active_nav": "users",
         "request": request,
         "user": current_user,
         "users": users,
@@ -53,6 +54,7 @@ async def view_user(
     balance = get_balance(user_id, db)
     submissions = db.query(Submission).filter(Submission.user_id == user_id).order_by(Submission.submitted_at.desc()).limit(20).all()
     return templates.TemplateResponse("admin/user_detail.html", {
+        "active_nav": "users",
         "request": request,
         "user": current_user,
         "target_user": target,
