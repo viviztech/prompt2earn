@@ -27,13 +27,15 @@
     <nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
-                <a href="/" class="flex items-center gap-2">
+                <a href="/" class="flex items-center gap-2 flex-shrink-0">
                     <div class="w-8 h-8 bg-brand-700 rounded-lg flex items-center justify-center">
                         <span class="text-white font-bold text-sm">PE</span>
                     </div>
                     <span class="text-xl font-bold text-brand-700">PromptEarn</span>
                 </a>
-                <div class="flex items-center gap-4">
+
+                <!-- Desktop nav -->
+                <div class="hidden md:flex items-center gap-4">
                     {% if user %}
                         <a href="/dashboard" class="text-sm text-gray-600 hover:text-brand-700 font-medium">Dashboard</a>
                         <a href="/wallet" class="text-sm text-gray-600 hover:text-brand-700 font-medium">Wallet</a>
@@ -48,18 +50,68 @@
                         <a href="/auth/register" class="bg-brand-700 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-brand-800">Get Started</a>
                     {% endif %}
                 </div>
+
+                <!-- Mobile hamburger -->
+                <button id="mobile-menu-btn" class="md:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100" onclick="toggleMobileMenu()">
+                    <svg id="menu-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                    <svg id="close-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile menu -->
+        <div id="mobile-menu" class="hidden md:hidden border-t border-gray-100 bg-white">
+            <div class="px-4 py-3 space-y-1">
+                {% if user %}
+                    <a href="/dashboard" class="block px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-brand-50 hover:text-brand-700">Dashboard</a>
+                    <a href="/wallet" class="block px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-brand-50 hover:text-brand-700">Wallet</a>
+                    <a href="/referral" class="block px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-brand-50 hover:text-brand-700">Referral</a>
+                    <a href="/leaderboard" class="block px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-brand-50 hover:text-brand-700">Leaderboard</a>
+                    <a href="/profile" class="block px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-brand-50 hover:text-brand-700">Profile ({{ user.full_name.split()[0] }})</a>
+                    <div class="pt-1 border-t border-gray-100">
+                        <form method="post" action="/auth/logout">
+                            <button type="submit" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50">Logout</button>
+                        </form>
+                    </div>
+                {% else %}
+                    <a href="/auth/login" class="block px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-brand-50 hover:text-brand-700">Login</a>
+                    <a href="/auth/register" class="block px-3 py-2.5 rounded-lg text-sm font-medium bg-brand-700 text-white text-center">Get Started</a>
+                {% endif %}
             </div>
         </div>
     </nav>
     {% endblock %}
 
-    {% block flash %}
-    {% endblock %}
+    {% block flash %}{% endblock %}
 
-    <main class="{% block main_class %}max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8{% endblock %}">
+    <main class="{% block main_class %}max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6{% endblock %}">
         {% block content %}{% endblock %}
     </main>
 
+    <script>
+    function toggleMobileMenu() {
+        const menu = document.getElementById('mobile-menu');
+        const menuIcon = document.getElementById('menu-icon');
+        const closeIcon = document.getElementById('close-icon');
+        menu.classList.toggle('hidden');
+        menuIcon.classList.toggle('hidden');
+        closeIcon.classList.toggle('hidden');
+    }
+    // Close menu when clicking outside
+    document.addEventListener('click', function(e) {
+        const btn = document.getElementById('mobile-menu-btn');
+        const menu = document.getElementById('mobile-menu');
+        if (btn && menu && !btn.contains(e.target) && !menu.contains(e.target)) {
+            menu.classList.add('hidden');
+            document.getElementById('menu-icon').classList.remove('hidden');
+            document.getElementById('close-icon').classList.add('hidden');
+        }
+    });
+    </script>
     {% block scripts %}{% endblock %}
 </body>
 </html>

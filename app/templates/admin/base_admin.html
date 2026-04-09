@@ -3,13 +3,15 @@
 <nav class="bg-gray-900 text-white shadow sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16 items-center">
-            <a href="/admin/dashboard" class="flex items-center gap-2">
+            <a href="/admin/dashboard" class="flex items-center gap-2 flex-shrink-0">
                 <div class="w-8 h-8 bg-brand-700 rounded-lg flex items-center justify-center">
                     <span class="text-white font-bold text-sm">PE</span>
                 </div>
-                <span class="text-lg font-bold">PromptEarn Admin</span>
+                <span class="text-base font-bold">Admin</span>
             </a>
-            <div class="flex items-center gap-6 text-sm">
+
+            <!-- Desktop nav -->
+            <div class="hidden lg:flex items-center gap-5 text-sm">
                 <a href="/admin/dashboard" class="hover:text-purple-300 {% if active_nav == 'dashboard' %}text-purple-300 font-semibold{% endif %}">Dashboard</a>
                 <a href="/admin/prompts" class="hover:text-purple-300 {% if active_nav == 'prompts' %}text-purple-300 font-semibold{% endif %}">Prompts</a>
                 <a href="/admin/submissions" class="hover:text-purple-300 {% if active_nav == 'submissions' %}text-purple-300 font-semibold{% endif %}">Submissions</a>
@@ -23,7 +25,56 @@
                     <button class="text-red-400 hover:text-red-300">Logout</button>
                 </form>
             </div>
+
+            <!-- Mobile hamburger -->
+            <button id="admin-menu-btn" class="lg:hidden p-2 rounded-lg text-gray-300 hover:bg-gray-700" onclick="toggleAdminMenu()">
+                <svg id="admin-menu-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+                <svg id="admin-close-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Mobile menu -->
+    <div id="admin-mobile-menu" class="hidden lg:hidden border-t border-gray-700 bg-gray-900">
+        <div class="px-4 py-3 space-y-1">
+            <a href="/admin/dashboard" class="block px-3 py-2.5 rounded-lg text-sm font-medium {% if active_nav == 'dashboard' %}bg-gray-700 text-purple-300{% else %}text-gray-300 hover:bg-gray-700 hover:text-white{% endif %}">Dashboard</a>
+            <a href="/admin/prompts" class="block px-3 py-2.5 rounded-lg text-sm font-medium {% if active_nav == 'prompts' %}bg-gray-700 text-purple-300{% else %}text-gray-300 hover:bg-gray-700 hover:text-white{% endif %}">Prompts</a>
+            <a href="/admin/submissions" class="block px-3 py-2.5 rounded-lg text-sm font-medium {% if active_nav == 'submissions' %}bg-gray-700 text-purple-300{% else %}text-gray-300 hover:bg-gray-700 hover:text-white{% endif %}">Submissions</a>
+            <a href="/admin/users" class="block px-3 py-2.5 rounded-lg text-sm font-medium {% if active_nav == 'users' %}bg-gray-700 text-purple-300{% else %}text-gray-300 hover:bg-gray-700 hover:text-white{% endif %}">Users</a>
+            <a href="/admin/payments" class="block px-3 py-2.5 rounded-lg text-sm font-medium {% if active_nav == 'payments' %}bg-gray-700 text-purple-300{% else %}text-gray-300 hover:bg-gray-700 hover:text-white{% endif %}">Payments</a>
+            <a href="/admin/redemptions" class="block px-3 py-2.5 rounded-lg text-sm font-medium {% if active_nav == 'redemptions' %}bg-gray-700 text-purple-300{% else %}text-gray-300 hover:bg-gray-700 hover:text-white{% endif %}">Redemptions</a>
+            <a href="/admin/reports" class="block px-3 py-2.5 rounded-lg text-sm font-medium {% if active_nav == 'reports' %}bg-gray-700 text-purple-300{% else %}text-gray-300 hover:bg-gray-700 hover:text-white{% endif %}">Reports</a>
+            <a href="/admin/settings" class="block px-3 py-2.5 rounded-lg text-sm font-medium {% if active_nav == 'settings' %}bg-gray-700 text-purple-300{% else %}text-gray-300 hover:bg-gray-700 hover:text-white{% endif %}">Settings</a>
+            <a href="/admin/plans" class="block px-3 py-2.5 rounded-lg text-sm font-medium {% if active_nav == 'plans' %}bg-gray-700 text-purple-300{% else %}text-gray-300 hover:bg-gray-700 hover:text-white{% endif %}">Plans</a>
+            <div class="pt-1 border-t border-gray-700">
+                <form method="post" action="/auth/logout">
+                    <button type="submit" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium text-red-400 hover:bg-gray-700">Logout</button>
+                </form>
+            </div>
         </div>
     </div>
 </nav>
+<script>
+function toggleAdminMenu() {
+    const menu = document.getElementById('admin-mobile-menu');
+    const menuIcon = document.getElementById('admin-menu-icon');
+    const closeIcon = document.getElementById('admin-close-icon');
+    menu.classList.toggle('hidden');
+    menuIcon.classList.toggle('hidden');
+    closeIcon.classList.toggle('hidden');
+}
+document.addEventListener('click', function(e) {
+    const btn = document.getElementById('admin-menu-btn');
+    const menu = document.getElementById('admin-mobile-menu');
+    if (btn && menu && !btn.contains(e.target) && !menu.contains(e.target)) {
+        menu.classList.add('hidden');
+        document.getElementById('admin-menu-icon').classList.remove('hidden');
+        document.getElementById('admin-close-icon').classList.add('hidden');
+    }
+});
+</script>
 {% endblock %}

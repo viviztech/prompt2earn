@@ -2,57 +2,86 @@
 {% block title %}Admin Dashboard — PromptEarn{% endblock %}
 {% block content %}
 <h1 class="text-2xl font-bold text-gray-800 mb-6">Dashboard Overview</h1>
-<div class="grid grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
+
+<div class="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
     {% for label, value, color in [
-        ('Total Users', stats.total_users, 'bg-blue-50 text-blue-700'),
-        ('Today Submissions', stats.today_submissions, 'bg-green-50 text-green-700'),
-        ('Pending Review', stats.pending_reviews, 'bg-yellow-50 text-yellow-700'),
-        ('Points This Month', stats.total_points_month, 'bg-purple-50 text-purple-700'),
-        ('Revenue This Month', '₹' ~ stats.revenue_month, 'bg-emerald-50 text-emerald-700'),
-        ('Pending Redemptions', stats.pending_redemptions, 'bg-red-50 text-red-700'),
+        ('Total Users', stats.total_users, 'text-blue-700'),
+        ('Today Submissions', stats.today_submissions, 'text-green-700'),
+        ('Pending Review', stats.pending_reviews, 'text-yellow-700'),
+        ('Points This Month', stats.total_points_month, 'text-purple-700'),
+        ('Revenue This Month', '₹' ~ stats.revenue_month, 'text-emerald-700'),
+        ('Pending Redemptions', stats.pending_redemptions, 'text-red-700'),
     ] %}
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
         <p class="text-xs text-gray-500 mb-1">{{ label }}</p>
-        <div class="text-2xl font-bold {{ color }} inline-block px-2 py-0.5 rounded">{{ value }}</div>
+        <div class="text-2xl font-bold {{ color }}">{{ value }}</div>
     </div>
     {% endfor %}
 </div>
 
-<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
     <div class="flex justify-between items-center mb-4">
         <h2 class="font-bold text-gray-700">Recent Submissions</h2>
         <a href="/admin/submissions" class="text-brand-700 text-sm hover:underline">View All →</a>
     </div>
-    <table class="w-full text-sm">
-        <thead>
-            <tr class="text-left text-gray-400 text-xs border-b">
-                <th class="pb-2">User</th>
-                <th class="pb-2">Prompt</th>
-                <th class="pb-2">Category</th>
-                <th class="pb-2">Status</th>
-                <th class="pb-2">Time</th>
-                <th class="pb-2"></th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for s in recent_submissions %}
-            <tr class="border-b border-gray-50 hover:bg-gray-50">
-                <td class="py-3">{{ s.user.full_name }}</td>
-                <td class="py-3 max-w-xs truncate">{{ s.prompt.title }}</td>
-                <td class="py-3">{{ s.prompt.category.display_name }}</td>
-                <td class="py-3">
-                    <span class="capitalize text-xs px-2 py-1 rounded-full font-medium
-                        {% if s.status == 'approved' %}bg-green-100 text-green-700
-                        {% elif s.status == 'rejected' %}bg-red-100 text-red-700
-                        {% else %}bg-yellow-100 text-yellow-700{% endif %}">
-                        {{ s.status }}
-                    </span>
-                </td>
-                <td class="py-3 text-gray-400">{{ s.submitted_at.strftime('%b %d %I:%M %p') }}</td>
-                <td class="py-3"><a href="/admin/submissions/{{ s.id }}" class="text-brand-700 hover:underline text-xs">Review</a></td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+
+    <!-- Desktop table -->
+    <div class="hidden sm:block overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="text-left text-gray-400 text-xs border-b">
+                    <th class="pb-2">User</th>
+                    <th class="pb-2">Prompt</th>
+                    <th class="pb-2">Category</th>
+                    <th class="pb-2">Status</th>
+                    <th class="pb-2">Time</th>
+                    <th class="pb-2"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in recent_submissions %}
+                <tr class="border-b border-gray-50 hover:bg-gray-50">
+                    <td class="py-3">{{ s.user.full_name }}</td>
+                    <td class="py-3 max-w-xs truncate">{{ s.prompt.title }}</td>
+                    <td class="py-3">{{ s.prompt.category.display_name }}</td>
+                    <td class="py-3">
+                        <span class="capitalize text-xs px-2 py-1 rounded-full font-medium
+                            {% if s.status == 'approved' %}bg-green-100 text-green-700
+                            {% elif s.status == 'rejected' %}bg-red-100 text-red-700
+                            {% else %}bg-yellow-100 text-yellow-700{% endif %}">
+                            {{ s.status }}
+                        </span>
+                    </td>
+                    <td class="py-3 text-gray-400">{{ s.submitted_at.strftime('%b %d %I:%M %p') }}</td>
+                    <td class="py-3"><a href="/admin/submissions/{{ s.id }}" class="text-brand-700 hover:underline text-xs">Review</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Mobile list -->
+    <div class="sm:hidden space-y-3">
+        {% for s in recent_submissions %}
+        <div class="border-b border-gray-50 pb-3 last:border-0">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-sm font-medium text-gray-800">{{ s.user.full_name }}</p>
+                    <p class="text-xs text-gray-500 truncate max-w-[200px]">{{ s.prompt.title }}</p>
+                </div>
+                <span class="capitalize text-xs px-2 py-1 rounded-full font-medium ml-2 flex-shrink-0
+                    {% if s.status == 'approved' %}bg-green-100 text-green-700
+                    {% elif s.status == 'rejected' %}bg-red-100 text-red-700
+                    {% else %}bg-yellow-100 text-yellow-700{% endif %}">
+                    {{ s.status }}
+                </span>
+            </div>
+            <div class="flex justify-between items-center mt-1">
+                <span class="text-xs text-gray-400">{{ s.submitted_at.strftime('%b %d %I:%M %p') }}</span>
+                <a href="/admin/submissions/{{ s.id }}" class="text-brand-700 text-xs font-semibold hover:underline">Review →</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 </div>
 {% endblock %}

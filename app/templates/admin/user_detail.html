@@ -6,12 +6,12 @@
     <div class="space-y-4">
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
             <div class="flex items-center gap-4 mb-4">
-                <div class="w-14 h-14 bg-brand-700 rounded-full flex items-center justify-center text-xl font-bold text-white">
+                <div class="w-14 h-14 bg-brand-700 rounded-full flex items-center justify-center text-xl font-bold text-white flex-shrink-0">
                     {{ target_user.full_name[0].upper() if target_user.full_name else 'U' }}
                 </div>
-                <div>
+                <div class="min-w-0">
                     <h2 class="font-bold text-gray-800">{{ target_user.full_name }}</h2>
-                    <p class="text-gray-500 text-sm">{{ target_user.email }}</p>
+                    <p class="text-gray-500 text-sm truncate">{{ target_user.email }}</p>
                 </div>
             </div>
             <div class="space-y-2 text-sm">
@@ -39,25 +39,44 @@
     </div>
 
     <div class="lg:col-span-2">
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
             <h3 class="font-bold text-gray-700 mb-4">Submission History</h3>
+
+            <!-- Desktop table -->
             {% if submissions %}
-            <table class="w-full text-sm">
-                <thead><tr class="text-left text-gray-400 text-xs border-b">
-                    <th class="pb-2">Prompt</th><th class="pb-2">Category</th><th class="pb-2">Status</th><th class="pb-2">Points</th><th class="pb-2">Date</th>
-                </tr></thead>
-                <tbody>
-                    {% for s in submissions %}
-                    <tr class="border-b border-gray-50 hover:bg-gray-50">
-                        <td class="py-2 truncate max-w-xs">{{ s.prompt.title }}</td>
-                        <td class="py-2">{{ s.prompt.category.display_name }}</td>
-                        <td class="py-2"><span class="capitalize text-xs px-2 py-0.5 rounded-full {% if s.status == 'approved' %}bg-green-100 text-green-700{% elif s.status == 'rejected' %}bg-red-100 text-red-700{% else %}bg-yellow-100 text-yellow-700{% endif %}">{{ s.status }}</span></td>
-                        <td class="py-2 font-medium text-brand-700">{{ s.points_awarded or '—' }}</td>
-                        <td class="py-2 text-gray-400">{{ s.submitted_at.strftime('%b %d') }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <div class="hidden sm:block overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead><tr class="text-left text-gray-400 text-xs border-b">
+                        <th class="pb-2">Prompt</th><th class="pb-2">Category</th><th class="pb-2">Status</th><th class="pb-2">Points</th><th class="pb-2">Date</th>
+                    </tr></thead>
+                    <tbody>
+                        {% for s in submissions %}
+                        <tr class="border-b border-gray-50 hover:bg-gray-50">
+                            <td class="py-2 truncate max-w-xs">{{ s.prompt.title }}</td>
+                            <td class="py-2">{{ s.prompt.category.display_name }}</td>
+                            <td class="py-2"><span class="capitalize text-xs px-2 py-0.5 rounded-full {% if s.status == 'approved' %}bg-green-100 text-green-700{% elif s.status == 'rejected' %}bg-red-100 text-red-700{% else %}bg-yellow-100 text-yellow-700{% endif %}">{{ s.status }}</span></td>
+                            <td class="py-2 font-medium text-brand-700">{{ s.points_awarded or '—' }}</td>
+                            <td class="py-2 text-gray-400">{{ s.submitted_at.strftime('%b %d') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <!-- Mobile cards -->
+            <div class="sm:hidden space-y-3">
+                {% for s in submissions %}
+                <div class="border border-gray-100 rounded-lg p-3">
+                    <div class="flex justify-between items-start mb-1">
+                        <p class="text-sm font-medium text-gray-800 flex-1 pr-2 truncate">{{ s.prompt.title }}</p>
+                        <span class="capitalize text-xs px-2 py-0.5 rounded-full flex-shrink-0 {% if s.status == 'approved' %}bg-green-100 text-green-700{% elif s.status == 'rejected' %}bg-red-100 text-red-700{% else %}bg-yellow-100 text-yellow-700{% endif %}">{{ s.status }}</span>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-400 mt-1">
+                        <span>{{ s.prompt.category.display_name }} · {{ s.submitted_at.strftime('%b %d') }}</span>
+                        <span class="font-semibold text-brand-700">{{ s.points_awarded or '—' }} pts</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
             {% else %}
             <p class="text-gray-400 text-sm text-center py-8">No submissions yet.</p>
             {% endif %}

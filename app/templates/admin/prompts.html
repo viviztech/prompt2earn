@@ -5,36 +5,64 @@
     <h1 class="text-2xl font-bold text-gray-800">Prompts</h1>
     <a href="/admin/prompts/new" class="bg-brand-700 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-brand-800">+ New Prompt</a>
 </div>
-<div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-    <table class="w-full text-sm">
-        <thead class="bg-gray-50">
-            <tr class="text-left text-gray-500 text-xs">
-                <th class="px-4 py-3">Title</th>
-                <th class="px-4 py-3">Category</th>
-                <th class="px-4 py-3">Points</th>
-                <th class="px-4 py-3">Deadline</th>
-                <th class="px-4 py-3">Visible To</th>
-                <th class="px-4 py-3">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for p in prompts %}
-            <tr class="border-t border-gray-50 hover:bg-gray-50">
-                <td class="px-4 py-3 font-medium">{{ p.title }}</td>
-                <td class="px-4 py-3">{{ p.category.display_name }}</td>
-                <td class="px-4 py-3 text-brand-700 font-bold">{{ p.point_value }}</td>
-                <td class="px-4 py-3 text-gray-500">{{ p.deadline.strftime('%b %d, %Y') }}</td>
-                <td class="px-4 py-3 text-xs">{{ p.visible_to | join(', ') }}</td>
-                <td class="px-4 py-3 flex gap-3">
-                    <a href="/admin/prompts/{{ p.id }}/edit" class="text-brand-700 hover:underline text-xs">Edit</a>
-                    <form method="post" action="/admin/prompts/{{ p.id }}/delete" onsubmit="return confirm('Delete this prompt?')">
-                        <button type="submit" class="text-red-500 hover:underline text-xs">Delete</button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% if not prompts %}<div class="text-center py-12 text-gray-400">No prompts yet. Create one!</div>{% endif %}
+
+<!-- Desktop table -->
+<div class="hidden md:block bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead class="bg-gray-50">
+                <tr class="text-left text-gray-500 text-xs">
+                    <th class="px-4 py-3">Title</th>
+                    <th class="px-4 py-3">Category</th>
+                    <th class="px-4 py-3">Points</th>
+                    <th class="px-4 py-3">Deadline</th>
+                    <th class="px-4 py-3">Visible To</th>
+                    <th class="px-4 py-3">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in prompts %}
+                <tr class="border-t border-gray-50 hover:bg-gray-50">
+                    <td class="px-4 py-3 font-medium">{{ p.title }}</td>
+                    <td class="px-4 py-3">{{ p.category.display_name }}</td>
+                    <td class="px-4 py-3 text-brand-700 font-bold">{{ p.point_value }}</td>
+                    <td class="px-4 py-3 text-gray-500">{{ p.deadline.strftime('%b %d, %Y') }}</td>
+                    <td class="px-4 py-3 text-xs">{{ p.visible_to | join(', ') }}</td>
+                    <td class="px-4 py-3">
+                        <div class="flex gap-3">
+                            <a href="/admin/prompts/{{ p.id }}/edit" class="text-brand-700 hover:underline text-xs">Edit</a>
+                            <form method="post" action="/admin/prompts/{{ p.id }}/delete" onsubmit="return confirm('Delete this prompt?')">
+                                <button type="submit" class="text-red-500 hover:underline text-xs">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% if not prompts %}<div class="text-center py-12 text-gray-400">No prompts yet. Create one!</div>{% endif %}
+    </div>
+</div>
+
+<!-- Mobile cards -->
+<div class="md:hidden space-y-3">
+    {% for p in prompts %}
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+        <div class="flex justify-between items-start mb-1">
+            <p class="font-semibold text-gray-800 text-sm flex-1 pr-2">{{ p.title }}</p>
+            <span class="text-brand-700 font-bold text-sm flex-shrink-0">+{{ p.point_value }} pts</span>
+        </div>
+        <p class="text-xs text-gray-500 mb-1">{{ p.category.display_name }} · {{ p.visible_to | join(', ') }}</p>
+        <p class="text-xs text-gray-400 mb-3">Deadline: {{ p.deadline.strftime('%b %d, %Y') }}</p>
+        <div class="flex gap-4">
+            <a href="/admin/prompts/{{ p.id }}/edit" class="text-brand-700 text-xs font-semibold hover:underline">Edit</a>
+            <form method="post" action="/admin/prompts/{{ p.id }}/delete" onsubmit="return confirm('Delete this prompt?')">
+                <button type="submit" class="text-red-500 text-xs font-semibold hover:underline">Delete</button>
+            </form>
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center py-12 text-gray-400">No prompts yet. Create one!</div>
+    {% endfor %}
 </div>
 {% endblock %}
