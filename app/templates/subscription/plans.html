@@ -20,8 +20,9 @@
 
         <!-- Earnings estimator -->
         {% set daily_pts = plan.max_daily_submissions * 10 %}
-        {% set monthly_low = (daily_pts * 20 * 0.6 * plan.point_multiplier) | int %}
-        {% set monthly_high = (daily_pts * 25 * 0.8 * plan.point_multiplier + plan.daily_completion_bonus * 7) | int %}
+        {% set multiplier = plan.point_multiplier | float %}
+        {% set monthly_low = (daily_pts * 20 * 0.6 * multiplier) | int %}
+        {% set monthly_high = (daily_pts * 25 * 0.8 * multiplier + plan.daily_completion_bonus * 7) | int %}
         <div class="bg-green-50 border border-green-200 rounded-xl px-3 py-2 mb-4 text-center">
             <p class="text-xs text-green-600 font-medium">Estimated Monthly Earnings</p>
             <p class="text-lg font-extrabold text-green-700">₹{{ monthly_low }}–₹{{ monthly_high }}</p>
