@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.dependencies import require_admin
 from app.models.submission import Submission
+from app.models.prompt import Prompt
 from app.services.points_service import award_points
 from app.services.s3_service import create_presigned_get_url
 from app.services.email_service import send_approval_email, send_rejection_email
@@ -52,12 +53,15 @@ async def view_submission(
     if not submission:
         raise HTTPException(status_code=404, detail="Submission not found")
     preview_url = create_presigned_get_url(submission.file_url, expiry_seconds=900)
+    from app.models.user import User
+    all_users = db.query(User).filter(User.is_active == True, User.role == "user").order_by(User.full_name).all()
     return templates.TemplateResponse("admin/submission_review.html", {
         "active_nav": "submissions",
         "request": request,
         "user": current_user,
         "submission": submission,
         "preview_url": preview_url,
+        "all_users": all_users,
     })
 
 
@@ -115,4 +119,59 @@ async def reject_submission(
         submission.prompt.title,
         review_note,
     )
+    return RedirectResponse(url="/admin/submissions?status=pending", status_code=302)
+
+
+@router.post("/submissions/{submission_id}/resend")
+async def resend_prompt_to_pool(
+    request: Request,
+    submission_id: str,
+    current_user=Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    """
+    Release prompt back to the user pool:
+    - Clears the prompt's assigned_to lock
+    - Deletes the submission so the user (or any other user) can take it again
+    """
+    submission = db.query(Submission).filter(Submission.id == submission_id).first()
+    if not submission:
+        raise HTTPException(status_code=404, detail="Submission not found")
+
+    prompt = db.query(Prompt).filter(Prompt.id == submission.prompt_id).first()
+    if prompt:
+        prompt.assigned_to = None
+        prompt.assigned_at = None
+
+    db.delete(submission)
+    db.commit()
+
+    return RedirectResponse(url="/admin/submissions?status=pending", status_code=302)
+
+
+@router.post("/submissions/{submission_id}/reassign")
+async def reassign_prompt_to_user(
+    request: Request,
+    submission_id: str,
+    target_user_id: str = Form(...),
+    current_user=Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    """
+    Reassign prompt directly to a specific user:
+    - Deletes the current submission
+    - Sets assigned_to to the chosen user
+    """
+    submission = db.query(Submission).filter(Submission.id == submission_id).first()
+    if not submission:
+        raise HTTPException(status_code=404, detail="Submission not found")
+
+    prompt = db.query(Prompt).filter(Prompt.id == submission.prompt_id).first()
+    if prompt:
+        prompt.assigned_to = target_user_id
+        prompt.assigned_at = datetime.utcnow()
+
+    db.delete(submission)
+    db.commit()
+
     return RedirectResponse(url="/admin/submissions?status=pending", status_code=302)

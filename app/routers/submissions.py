@@ -31,6 +31,19 @@ def get_user_active_sub(user_id, db: Session):
     ).first()
 
 
+def _claim_prompt(prompt: Prompt, user_id, db: Session) -> bool:
+    """
+    Atomically claim a prompt for a user.
+    Returns True if claimed (or already owned by this user), False if taken by another.
+    """
+    if prompt.assigned_to is None:
+        prompt.assigned_to = user_id
+        prompt.assigned_at = datetime.utcnow()
+        db.commit()
+        return True
+    return str(prompt.assigned_to) == str(user_id)
+
+
 @router.post("/api/upload/presign")
 async def presign_upload(
     request: Request,
@@ -57,13 +70,17 @@ async def presign_upload(
     if prompt.visible_to and plan_name not in prompt.visible_to:
         raise HTTPException(status_code=403, detail="Your plan does not have access to this prompt")
 
-    # Check duplicate submission
+    # Check if already submitted
     existing = db.query(Submission).filter(
         Submission.user_id == current_user.id,
         Submission.prompt_id == prompt_id,
     ).first()
     if existing:
         raise HTTPException(status_code=400, detail="You have already submitted for this prompt")
+
+    # Claim the prompt — lock it to this user
+    if not _claim_prompt(prompt, current_user.id, db):
+        raise HTTPException(status_code=409, detail="This prompt has already been taken by another user")
 
     # Enforce daily submission cap
     max_daily = getattr(sub.plan, "max_daily_submissions", 2)
@@ -110,6 +127,12 @@ async def prompt_detail(
         Submission.prompt_id == prompt_id,
     ).first()
 
+    # Check if prompt is locked to another user
+    is_locked_to_other = (
+        prompt.assigned_to is not None
+        and str(prompt.assigned_to) != str(current_user.id)
+    )
+
     is_past_deadline = datetime.utcnow() > prompt.deadline
 
     return templates.TemplateResponse("user/prompt_detail.html", {
@@ -118,6 +141,7 @@ async def prompt_detail(
         "prompt": prompt,
         "existing_submission": existing_submission,
         "is_past_deadline": is_past_deadline,
+        "is_locked_to_other": is_locked_to_other,
     })
 
 
@@ -150,6 +174,10 @@ async def submit_prompt(
     if existing:
         raise HTTPException(status_code=400, detail="Already submitted")
 
+    # Verify this user owns the prompt lock
+    if prompt.assigned_to is not None and str(prompt.assigned_to) != str(current_user.id):
+        raise HTTPException(status_code=409, detail="This prompt has been taken by another user")
+
     # Enforce daily submission cap
     max_daily = getattr(sub.plan, "max_daily_submissions", 2)
     today_count = _count_today_submissions(current_user.id, db)
@@ -166,6 +194,9 @@ async def submit_prompt(
         status="pending",
     )
     db.add(submission)
+    # Ensure prompt is locked to this user (in case presign was skipped somehow)
+    prompt.assigned_to = current_user.id
+    prompt.assigned_at = datetime.utcnow()
     db.commit()
 
     return RedirectResponse(url=f"/prompts/{prompt_id}?submitted=1", status_code=302)

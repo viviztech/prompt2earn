@@ -33,10 +33,12 @@ async def dashboard(
     plan_name = active_sub.plan.name
     now = datetime.utcnow()
 
+    from sqlalchemy import or_
     prompts = db.query(Prompt).filter(
         Prompt.is_active == True,
         Prompt.deadline > now,
         Prompt.visible_to.contains([plan_name]),
+        or_(Prompt.assigned_to == None, Prompt.assigned_to == current_user.id),
     ).order_by(Prompt.deadline.asc()).all()
 
     submitted_ids = {

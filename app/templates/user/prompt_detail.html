@@ -39,6 +39,13 @@
         {% endif %}
     </div>
 
+    {% elif is_locked_to_other %}
+    <div class="bg-orange-50 border border-orange-200 text-orange-700 rounded-xl px-5 py-4 text-sm text-center">
+        <div class="text-2xl mb-2">🔒</div>
+        <p class="font-semibold">This prompt has been taken by another user.</p>
+        <p class="text-xs mt-1 text-orange-500">Check the dashboard for other available prompts.</p>
+    </div>
+
     {% elif is_past_deadline %}
     <div class="bg-red-50 border border-red-200 text-red-700 rounded-xl px-5 py-4 text-sm text-center">
         This prompt has passed its deadline and is no longer accepting submissions.

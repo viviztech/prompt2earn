@@ -7,11 +7,11 @@
     <!-- File Preview -->
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <h2 class="font-bold text-gray-700 mb-4">Submitted File</h2>
-        {% if submission.file_type.startswith('image') %}
+        {% if submission.file_type and submission.file_type.startswith('image') %}
         <img src="{{ preview_url }}" alt="Submission" class="rounded-lg max-w-full max-h-96 object-contain mx-auto">
-        {% elif submission.file_type.startswith('video') %}
+        {% elif submission.file_type and submission.file_type.startswith('video') %}
         <video controls class="rounded-lg w-full max-h-96"><source src="{{ preview_url }}" type="{{ submission.file_type }}"></video>
-        {% elif submission.file_type.startswith('audio') %}
+        {% elif submission.file_type and submission.file_type.startswith('audio') %}
         <audio controls class="w-full mt-4"><source src="{{ preview_url }}" type="{{ submission.file_type }}"></audio>
         {% else %}
         <a href="{{ preview_url }}" target="_blank" class="text-brand-700 underline text-sm">Download / View File</a>
@@ -25,6 +25,7 @@
 
     <!-- Review Panel -->
     <div class="space-y-4">
+        <!-- Submission details -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
             <h2 class="font-bold text-gray-700 mb-3">Submission Details</h2>
             <div class="space-y-2 text-sm">
@@ -33,7 +34,7 @@
                 <div class="flex justify-between"><span class="text-gray-500">Category:</span><span>{{ submission.prompt.category.display_name }}</span></div>
                 <div class="flex justify-between"><span class="text-gray-500">Points Value:</span><span class="text-brand-700 font-bold">{{ submission.prompt.point_value }}</span></div>
                 <div class="flex justify-between"><span class="text-gray-500">Submitted:</span><span>{{ submission.submitted_at.strftime('%b %d, %Y %I:%M %p') }}</span></div>
-                <div class="flex justify-between"><span class="text-gray-500">Status:</span>
+                <div class="flex justify-between items-center"><span class="text-gray-500">Status:</span>
                     <span class="capitalize text-xs px-2 py-1 rounded-full font-medium
                         {% if submission.status == 'approved' %}bg-green-100 text-green-700
                         {% elif submission.status == 'rejected' %}bg-red-100 text-red-700
@@ -41,9 +42,20 @@
                         {{ submission.status }}
                     </span>
                 </div>
+                <div class="flex justify-between items-center pt-1 border-t border-gray-50">
+                    <span class="text-gray-500">Prompt Assigned To:</span>
+                    <span class="font-medium text-xs">
+                        {% if submission.prompt.assigned_to %}
+                            {{ submission.user.full_name if submission.prompt.assigned_to == submission.user_id else 'User #' ~ submission.prompt.assigned_to | string | truncate(8, true, '') }}
+                        {% else %}
+                            <span class="text-green-600">Available (unlocked)</span>
+                        {% endif %}
+                    </span>
+                </div>
             </div>
         </div>
 
+        <!-- Review actions -->
         {% if submission.status == 'pending' %}
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
             <h2 class="font-bold text-gray-700 mb-4">Review Action</h2>
@@ -62,10 +74,44 @@
         </div>
         {% else %}
         <div class="bg-gray-50 rounded-2xl border border-gray-200 p-5 text-sm text-gray-500">
-            Already reviewed on {{ submission.reviewed_at.strftime('%b %d, %Y') if submission.reviewed_at else 'N/A' }}.
+            Reviewed on {{ submission.reviewed_at.strftime('%b %d, %Y') if submission.reviewed_at else 'N/A' }}.
             {% if submission.review_note %}<p class="mt-2 text-red-600">{{ submission.review_note }}</p>{% endif %}
         </div>
         {% endif %}
+
+        <!-- Resend / Reassign panel -->
+        <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5">
+            <h2 class="font-bold text-amber-800 mb-1 text-sm">Admin: Resend Prompt</h2>
+            <p class="text-xs text-amber-600 mb-4">This will delete the current submission and release the prompt so it can be taken again.</p>
+
+            <!-- Release to pool -->
+            <form method="post" action="/admin/submissions/{{ submission.id }}/resend"
+                  onsubmit="return confirm('Release this prompt back to the user pool? The current submission will be deleted.')">
+                <button type="submit" class="w-full bg-amber-500 text-white py-2.5 rounded-xl font-semibold text-sm hover:bg-amber-600 transition mb-3">
+                    🔓 Release to User Pool (any user can take it)
+                </button>
+            </form>
+
+            <!-- Reassign to specific user -->
+            <form method="post" action="/admin/submissions/{{ submission.id }}/reassign"
+                  onsubmit="return confirm('Reassign this prompt to the selected user? The current submission will be deleted.')">
+                <label class="block text-xs font-medium text-amber-700 mb-1">Or reassign directly to a user:</label>
+                <div class="flex gap-2">
+                    <select name="target_user_id" required
+                        class="flex-1 border border-amber-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white">
+                        <option value="">Select user…</option>
+                        {% for u in all_users %}
+                        <option value="{{ u.id }}" {% if u.id == submission.user_id %}selected{% endif %}>
+                            {{ u.full_name }} ({{ u.email }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="bg-amber-700 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-amber-800 transition">
+                        Reassign
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 {% endblock %}

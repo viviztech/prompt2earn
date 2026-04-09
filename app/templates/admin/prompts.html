@@ -17,6 +17,7 @@
                     <th class="px-4 py-3">Points</th>
                     <th class="px-4 py-3">Deadline</th>
                     <th class="px-4 py-3">Visible To</th>
+                    <th class="px-4 py-3">Assigned To</th>
                     <th class="px-4 py-3">Actions</th>
                 </tr>
             </thead>
@@ -28,9 +29,23 @@
                     <td class="px-4 py-3 text-brand-700 font-bold">{{ p.point_value }}</td>
                     <td class="px-4 py-3 text-gray-500">{{ p.deadline.strftime('%b %d, %Y') }}</td>
                     <td class="px-4 py-3 text-xs">{{ p.visible_to | join(', ') }}</td>
+                    <td class="px-4 py-3 text-xs">
+                        {% if p.assigned_to %}
+                        <span class="inline-flex items-center gap-1 bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-medium">
+                            🔒 {{ p.assignee.full_name if p.assignee else 'User' }}
+                        </span>
+                        {% else %}
+                        <span class="text-green-600 font-medium">Available</span>
+                        {% endif %}
+                    </td>
                     <td class="px-4 py-3">
                         <div class="flex gap-3">
                             <a href="/admin/prompts/{{ p.id }}/edit" class="text-brand-700 hover:underline text-xs">Edit</a>
+                            {% if p.assigned_to %}
+                            <form method="post" action="/admin/prompts/{{ p.id }}/release" onsubmit="return confirm('Release this prompt back to the pool?')">
+                                <button type="submit" class="text-orange-600 hover:underline text-xs">Release</button>
+                            </form>
+                            {% endif %}
                             <form method="post" action="/admin/prompts/{{ p.id }}/delete" onsubmit="return confirm('Delete this prompt?')">
                                 <button type="submit" class="text-red-500 hover:underline text-xs">Delete</button>
                             </form>

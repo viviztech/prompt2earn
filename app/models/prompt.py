@@ -35,6 +35,11 @@ class Prompt(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+    # Prompt locking — once claimed by a user, hidden from all others
+    assigned_to = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True, index=True)
+    assigned_at = Column(DateTime, nullable=True)
+
     category = relationship("PromptCategory", back_populates="prompts")
     creator = relationship("User", foreign_keys=[created_by])
+    assignee = relationship("User", foreign_keys=[assigned_to])
     submissions = relationship("Submission", back_populates="prompt", lazy="dynamic")

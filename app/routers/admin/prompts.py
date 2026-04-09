@@ -135,3 +135,19 @@ async def delete_prompt(
         prompt.is_active = False
         db.commit()
     return RedirectResponse(url="/admin/prompts", status_code=302)
+
+
+@router.post("/prompts/{prompt_id}/release")
+async def release_prompt_lock(
+    request: Request,
+    prompt_id: str,
+    current_user=Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    """Clear the prompt assignment so any eligible user can take it again."""
+    prompt = db.query(Prompt).filter(Prompt.id == prompt_id).first()
+    if prompt:
+        prompt.assigned_to = None
+        prompt.assigned_at = None
+        db.commit()
+    return RedirectResponse(url="/admin/prompts", status_code=302)
