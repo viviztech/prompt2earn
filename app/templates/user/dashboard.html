@@ -8,19 +8,41 @@
 <p class="text-gray-500 mb-6 text-sm">Complete prompts and earn points. Points = cash!</p>
 
 <!-- Stats bar -->
-<div class="grid grid-cols-3 gap-4 mb-8">
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
     <div class="bg-white rounded-xl p-4 shadow-sm text-center border border-gray-100">
         <div class="text-2xl font-bold text-brand-700">{{ balance }}</div>
         <div class="text-xs text-gray-500 mt-1">Points Balance</div>
     </div>
     <div class="bg-white rounded-xl p-4 shadow-sm text-center border border-gray-100">
-        <div class="text-2xl font-bold text-green-600">{{ submitted_ids|length }}</div>
+        <div class="text-2xl font-bold text-green-600">{{ today_count }}</div>
         <div class="text-xs text-gray-500 mt-1">Submitted Today</div>
     </div>
     <div class="bg-white rounded-xl p-4 shadow-sm text-center border border-gray-100">
-        <div class="text-2xl font-bold text-gray-700">{{ prompts|length }}</div>
-        <div class="text-xs text-gray-500 mt-1">Available Prompts</div>
+        <div class="text-2xl font-bold text-orange-500">🔥 {{ user.current_streak or 0 }}</div>
+        <div class="text-xs text-gray-500 mt-1">Day Streak</div>
     </div>
+    <div class="bg-white rounded-xl p-4 shadow-sm text-center border border-gray-100">
+        <div class="text-2xl font-bold text-gray-700">{{ prompts|length }}</div>
+        <div class="text-xs text-gray-500 mt-1">Available</div>
+    </div>
+</div>
+
+<!-- Daily progress bar -->
+{% set max_daily = active_sub.plan.max_daily_submissions %}
+{% set pct = ((today_count / max_daily) * 100) | int if max_daily > 0 else 0 %}
+<div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 mb-8">
+    <div class="flex justify-between items-center mb-2">
+        <span class="text-sm font-medium text-gray-700">Daily Progress</span>
+        <span class="text-sm font-bold {% if today_count >= max_daily %}text-green-600{% else %}text-brand-700{% endif %}">
+            {{ today_count }} / {{ max_daily }} submissions
+        </span>
+    </div>
+    <div class="w-full bg-gray-100 rounded-full h-2.5">
+        <div class="h-2.5 rounded-full transition-all {% if today_count >= max_daily %}bg-green-500{% else %}bg-brand-700{% endif %}" style="width: {{ [pct, 100] | min }}%"></div>
+    </div>
+    {% if today_count >= max_daily %}
+    <p class="text-xs text-green-600 font-medium mt-2">🎯 Daily limit reached! Come back tomorrow for more prompts.</p>
+    {% endif %}
 </div>
 
 <!-- Prompts Grid -->

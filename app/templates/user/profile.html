@@ -1,21 +1,65 @@
 {% extends "base.html" %}
 {% block title %}Profile — PromptEarn{% endblock %}
 {% block content %}
-<div class="max-w-xl mx-auto">
+<div class="max-w-2xl mx-auto">
     <h1 class="text-2xl font-bold text-gray-800 mb-6">My Profile</h1>
 
     {% if request.query_params.get('updated') %}
-    <div class="bg-green-50 border border-green-200 text-green-700 rounded-xl px-5 py-3 mb-6 text-sm">Profile updated successfully.</div>
+    <div class="bg-green-50 border border-green-200 text-green-700 rounded-xl px-5 py-3 mb-6 text-sm font-medium">
+        ✅ Profile updated successfully.
+    </div>
     {% endif %}
 
+    <!-- Stats Row -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center">
+            <div class="text-2xl font-bold text-brand-700">{{ balance }}</div>
+            <div class="text-xs text-gray-500 mt-1">Points Balance</div>
+        </div>
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center">
+            <div class="text-2xl font-bold text-green-600">{{ approved_submissions }}</div>
+            <div class="text-xs text-gray-500 mt-1">Approved</div>
+        </div>
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center">
+            <div class="text-2xl font-bold text-orange-500">🔥 {{ user.current_streak or 0 }}</div>
+            <div class="text-xs text-gray-500 mt-1">Day Streak</div>
+        </div>
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center">
+            <div class="text-2xl font-bold text-purple-600">{{ referral_count }}</div>
+            <div class="text-xs text-gray-500 mt-1">Referrals</div>
+        </div>
+    </div>
+
+    <!-- Subscription Card -->
+    <div class="bg-gradient-to-br from-brand-700 to-purple-900 text-white rounded-2xl p-5 mb-6">
+        <div class="flex justify-between items-start">
+            <div>
+                <p class="text-purple-200 text-xs font-medium uppercase tracking-wide mb-1">Current Plan</p>
+                <div class="text-xl font-bold">{{ active_sub.plan.display_name if active_sub else 'No Active Plan' }}</div>
+                {% if active_sub %}
+                <p class="text-purple-300 text-sm mt-1">Expires {{ active_sub.expires_at.strftime('%b %d, %Y') }}</p>
+                {% else %}
+                <p class="text-purple-300 text-sm mt-1">Subscribe to start earning</p>
+                {% endif %}
+            </div>
+            {% if not active_sub %}
+            <a href="/subscriptions/plans" class="bg-white text-brand-700 px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-100 transition">Subscribe</a>
+            {% else %}
+            <a href="/subscriptions/plans" class="border border-purple-400 text-purple-200 px-3 py-1.5 rounded-lg text-xs hover:bg-white hover:text-brand-700 transition">Upgrade</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Edit Profile -->
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
-        <div class="flex items-center gap-4 mb-6">
-            <div class="w-16 h-16 bg-brand-700 rounded-full flex items-center justify-center text-2xl font-bold text-white">
+        <div class="flex items-center gap-4 mb-5">
+            <div class="w-14 h-14 bg-brand-700 rounded-full flex items-center justify-center text-2xl font-bold text-white">
                 {{ user.full_name[0].upper() if user.full_name else 'U' }}
             </div>
             <div>
                 <h2 class="font-bold text-gray-800 text-lg">{{ user.full_name }}</h2>
                 <p class="text-gray-500 text-sm">{{ user.email }}</p>
+                <p class="text-xs text-gray-400 mt-0.5">Member since {{ user.created_at.strftime('%B %Y') }}</p>
             </div>
         </div>
 
@@ -34,17 +78,16 @@
         </form>
     </div>
 
-    <div class="grid grid-cols-2 gap-4">
-        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center">
-            <div class="text-2xl font-bold text-brand-700">{{ balance }}</div>
-            <div class="text-xs text-gray-500 mt-1">Points Balance</div>
-        </div>
-        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center">
-            <div class="text-sm font-bold text-gray-700">{{ active_sub.plan.display_name if active_sub else 'No Plan' }}</div>
-            <div class="text-xs text-gray-500 mt-1">
-                {% if active_sub %}Expires {{ active_sub.expires_at.strftime('%b %d, %Y') }}{% else %}Subscribe to start earning{% endif %}
+    <!-- Referral Code -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <h2 class="font-bold text-gray-800 mb-3">Your Referral Code</h2>
+        <div class="flex items-center gap-3">
+            <div class="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 font-mono text-brand-700 font-bold tracking-widest text-lg">
+                {{ user.referral_code or '—' }}
             </div>
+            <a href="/referral" class="bg-brand-700 text-white px-4 py-3 rounded-lg text-sm font-semibold hover:bg-brand-800 transition whitespace-nowrap">Share & Earn</a>
         </div>
+        <p class="text-xs text-gray-400 mt-2">Share your referral code — earn bonus points when friends subscribe.</p>
     </div>
 </div>
 {% endblock %}

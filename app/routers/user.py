@@ -45,6 +45,12 @@ async def dashboard(
         ).all()
     }
 
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    today_count = db.query(Submission).filter(
+        Submission.user_id == current_user.id,
+        Submission.submitted_at >= today_start,
+    ).count()
+
     balance = get_balance(current_user.id, db)
 
     return templates.TemplateResponse("user/dashboard.html", {
@@ -54,6 +60,7 @@ async def dashboard(
         "submitted_ids": submitted_ids,
         "active_sub": active_sub,
         "balance": balance,
+        "today_count": today_count,
     })
 
 
@@ -69,11 +76,24 @@ async def profile_page(
         UserSubscription.expires_at > datetime.utcnow(),
     ).first()
     balance = get_balance(current_user.id, db)
+    total_submissions = db.query(Submission).filter(Submission.user_id == current_user.id).count()
+    approved_submissions = db.query(Submission).filter(
+        Submission.user_id == current_user.id,
+        Submission.status == "approved",
+    ).count()
+    referral_count = db.query(Submission).filter(
+        Submission.user_id == current_user.id,
+    ).count()
+    from app.models.user import User
+    referral_count = db.query(User).filter(User.referred_by == current_user.id).count()
     return templates.TemplateResponse("user/profile.html", {
         "request": request,
         "user": current_user,
         "active_sub": active_sub,
         "balance": balance,
+        "total_submissions": total_submissions,
+        "approved_submissions": approved_submissions,
+        "referral_count": referral_count,
     })
 
 
