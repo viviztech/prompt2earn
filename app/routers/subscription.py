@@ -24,17 +24,22 @@ settings = get_settings()
 
 
 def _maybe_award_referral_bonus(user_id, db: Session):
-    """Award referral bonus to referrer on first-ever subscription of this user."""
+    """Award plan-based referral bonus to referrer on referee's first subscription."""
     from app.models.user import User
     user = db.query(User).filter(User.id == user_id).first()
     if not user or not user.referred_by or user.referral_bonus_paid:
         return
-    # Only award on first subscription
-    from app.models.subscription import UserSubscription
     sub_count = db.query(UserSubscription).filter(UserSubscription.user_id == user_id).count()
-    if sub_count <= 1:  # the one just created counts as 1
+    if sub_count <= 1:
+        # Get bonus points from the plan the referee just subscribed to
+        active_sub = db.query(UserSubscription).filter(
+            UserSubscription.user_id == user_id,
+            UserSubscription.status == "active",
+        ).order_by(UserSubscription.created_at.desc()).first()
+        bonus_pts = active_sub.plan.referral_bonus_points if active_sub else settings.REFERRAL_BONUS_POINTS
         try:
-            award_referral_bonus(user.referred_by, user.full_name or user.email, db)
+            award_referral_bonus(user.referred_by, user.full_name or user.email, db,
+                                 bonus_points=bonus_pts)
         except Exception as e:
             logger.error(f"Referral bonus award failed: {e}")
         user.referral_bonus_paid = True

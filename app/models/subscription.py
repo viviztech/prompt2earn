@@ -21,6 +21,12 @@ class SubscriptionPlan(Base):
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
+    # Economics model
+    max_daily_submissions = Column(Integer, nullable=False, default=2)
+    referral_bonus_points = Column(Integer, nullable=False, default=24)  # pts awarded to referrer
+    daily_completion_bonus = Column(Integer, nullable=False, default=5)  # pts for 100% day
+    company_profit_pct = Column(Numeric(4, 2), nullable=False, default=20.0)  # always 20%
+
     subscriptions = relationship("UserSubscription", back_populates="plan", lazy="dynamic")
 
 

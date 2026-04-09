@@ -1,38 +1,204 @@
 {% extends "admin/base_admin.html" %}
-{% block title %}Reports — Admin{% endblock %}
+{% block title %}P&L Reports — Admin{% endblock %}
 {% block content %}
-<h1 class="text-2xl font-bold text-gray-800 mb-6">Revenue & Analytics</h1>
+<h1 class="text-2xl font-bold text-gray-800 mb-1">Platform P&amp;L Dashboard</h1>
+<p class="text-sm text-gray-400 mb-6">20% company profit · 80% user pool · real-time</p>
 
-<div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-    {% for label, value, color in [
-        ('Total Revenue', '₹' ~ total_revenue | int, 'text-emerald-700'),
-        ('Points Awarded', total_points_awarded | int, 'text-brand-700'),
-        ('Points Redeemed', total_redeemed | int, 'text-purple-700'),
-        ('Total Users', total_users, 'text-blue-700'),
-        ('Total Submissions', total_submissions, 'text-gray-700'),
-    ] %}
-    <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 text-center">
-        <div class="text-xl font-bold {{ color }}">{{ value }}</div>
-        <div class="text-xs text-gray-500 mt-1">{{ label }}</div>
+<!-- Top KPIs -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="bg-gradient-to-br from-brand-700 to-purple-900 rounded-2xl p-5 text-white">
+        <p class="text-purple-200 text-xs mb-1">Total Revenue</p>
+        <div class="text-3xl font-extrabold">₹{{ "{:,.0f}".format(total_revenue) }}</div>
+        <p class="text-purple-300 text-xs mt-1">all time</p>
     </div>
-    {% endfor %}
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+        <p class="text-gray-400 text-xs mb-1">This Month Revenue</p>
+        <div class="text-2xl font-extrabold text-gray-800">₹{{ "{:,.0f}".format(this_month_revenue) }}</div>
+        {% if last_month_revenue > 0 %}
+        <p class="text-xs mt-1 {% if this_month_revenue >= last_month_revenue %}text-green-600{% else %}text-red-500{% endif %}">
+            {% if this_month_revenue >= last_month_revenue %}▲{% else %}▼{% endif %}
+            vs ₹{{ "{:,.0f}".format(last_month_revenue) }} last month
+        </p>
+        {% endif %}
+    </div>
+    <div class="bg-green-50 rounded-2xl border border-green-200 p-5">
+        <p class="text-green-600 text-xs mb-1">Company Profit (20%)</p>
+        <div class="text-2xl font-extrabold text-green-700">₹{{ "{:,.0f}".format(company_profit_this_month) }}</div>
+        <p class="text-green-500 text-xs mt-1">this month · ₹{{ "{:,.0f}".format(company_profit_total) }} total</p>
+    </div>
+    <div class="bg-blue-50 rounded-2xl border border-blue-200 p-5">
+        <p class="text-blue-600 text-xs mb-1">Net Margin (after payouts)</p>
+        <div class="text-2xl font-extrabold text-blue-700">{{ net_margin_pct }}%</div>
+        <p class="text-blue-500 text-xs mt-1">₹{{ "{:,.0f}".format(net_margin) }} retained</p>
+    </div>
 </div>
 
-<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-    <h2 class="font-bold text-gray-700 mb-4">Monthly Revenue (Last 6 Months)</h2>
-    <div class="space-y-3">
-        {% set max_rev = monthly_revenue | map(attribute='revenue') | max | default(1) %}
-        {% for m in monthly_revenue %}
-        <div class="flex items-center gap-4">
-            <span class="text-sm text-gray-500 w-20">{{ m.month }}</span>
-            <div class="flex-1 bg-gray-100 rounded-full h-5 overflow-hidden">
-                <div class="bg-brand-700 h-5 rounded-full flex items-center justify-end pr-2"
-                    style="width: {{ ((m.revenue / max_rev) * 100) | round | int }}%; min-width: 2%;">
-                    <span class="text-white text-xs font-medium">₹{{ m.revenue | int }}</span>
+<!-- Economics breakdown -->
+<div class="grid lg:grid-cols-3 gap-4 mb-6">
+    <!-- Pool split -->
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+        <h3 class="font-semibold text-gray-700 mb-4">This Month Pool Split</h3>
+        <div class="space-y-3">
+            <div>
+                <div class="flex justify-between text-sm mb-1">
+                    <span class="text-gray-500">Company Profit (20%)</span>
+                    <span class="font-bold text-green-600">₹{{ "{:,.0f}".format(company_profit_this_month) }}</span>
+                </div>
+                <div class="w-full bg-gray-100 rounded-full h-2">
+                    <div class="bg-green-500 h-2 rounded-full" style="width:20%"></div>
+                </div>
+            </div>
+            <div>
+                <div class="flex justify-between text-sm mb-1">
+                    <span class="text-gray-500">User Pool (80%)</span>
+                    <span class="font-bold text-brand-700">₹{{ "{:,.0f}".format(user_pool_this_month) }}</span>
+                </div>
+                <div class="w-full bg-gray-100 rounded-full h-2">
+                    <div class="bg-brand-700 h-2 rounded-full" style="width:80%"></div>
+                </div>
+            </div>
+            <div class="pt-2 border-t border-gray-100">
+                <div class="flex justify-between text-sm mb-1">
+                    <span class="text-gray-500">Actual Paid Out (all time)</span>
+                    <span class="font-bold text-red-500">₹{{ "{:,.0f}".format(total_paid_out) }}</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-500">Unredeemed Buffer</span>
+                    <span class="font-bold text-gray-700">₹{{ "{:,.0f}".format(unredeemed_inr) }}</span>
                 </div>
             </div>
         </div>
-        {% endfor %}
+    </div>
+
+    <!-- Points ledger -->
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+        <h3 class="font-semibold text-gray-700 mb-4">Points Ledger</h3>
+        <div class="space-y-3 text-sm">
+            <div class="flex justify-between">
+                <span class="text-gray-500">Total Awarded</span>
+                <span class="font-bold text-green-600">+{{ "{:,}".format(total_points_awarded) }} pts</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">Bonus Points</span>
+                <span class="font-bold text-brand-700">+{{ "{:,}".format(total_bonus_points) }} pts</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">Redeemed</span>
+                <span class="font-bold text-red-500">-{{ "{:,}".format(total_redeemed_pts) }} pts</span>
+            </div>
+            <div class="flex justify-between border-t border-gray-100 pt-2">
+                <span class="text-gray-500">Unredeemed Liability</span>
+                <span class="font-bold text-gray-800">{{ "{:,}".format(unredeemed_inr) }} pts</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">Pending Payouts</span>
+                <span class="font-bold text-yellow-600">₹{{ "{:,.0f}".format(pending_payout) }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Submissions -->
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+        <h3 class="font-semibold text-gray-700 mb-4">Submissions</h3>
+        <div class="space-y-3 text-sm">
+            <div class="flex justify-between">
+                <span class="text-gray-500">Total</span>
+                <span class="font-bold">{{ "{:,}".format(total_submissions) }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">Approved</span>
+                <span class="font-bold text-green-600">{{ "{:,}".format(approved_submissions) }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">Approval Rate</span>
+                <span class="font-bold {% if approval_rate >= 60 %}text-green-600{% else %}text-yellow-600{% endif %}">{{ approval_rate }}%</span>
+            </div>
+            <div class="flex justify-between border-t border-gray-100 pt-2">
+                <span class="text-gray-500">This Month</span>
+                <span class="font-bold">{{ "{:,}".format(this_month_submissions) }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Users & Subscriptions -->
+<div class="grid lg:grid-cols-2 gap-4 mb-6">
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+        <h3 class="font-semibold text-gray-700 mb-4">Users</h3>
+        <div class="grid grid-cols-3 gap-4 text-center">
+            <div>
+                <div class="text-2xl font-extrabold text-gray-800">{{ total_users }}</div>
+                <p class="text-xs text-gray-400 mt-1">Total Users</p>
+            </div>
+            <div>
+                <div class="text-2xl font-extrabold text-green-600">+{{ new_users_this_month }}</div>
+                <p class="text-xs text-gray-400 mt-1">New This Month</p>
+            </div>
+            <div>
+                <div class="text-2xl font-extrabold text-brand-700">{{ active_subs }}</div>
+                <p class="text-xs text-gray-400 mt-1">Active Subs</p>
+            </div>
+        </div>
+        <div class="mt-4 pt-4 border-t border-gray-100">
+            <p class="text-xs text-gray-500 mb-1">Monthly Recurring Revenue (MRR)</p>
+            <div class="text-xl font-extrabold text-brand-700">₹{{ "{:,.0f}".format(mrr) }}/month</div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+        <h3 class="font-semibold text-gray-700 mb-4">Active Subscriptions by Plan</h3>
+        {% if plan_breakdown %}
+        <div class="space-y-3">
+            {% for plan in plan_breakdown %}
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span class="text-xs px-2 py-0.5 rounded-full font-medium
+                        {% if plan.name == 'Premium' %}bg-purple-100 text-purple-700
+                        {% elif plan.name == 'Pro' %}bg-blue-100 text-blue-700
+                        {% else %}bg-gray-100 text-gray-600{% endif %}">
+                        {{ plan.name }}
+                    </span>
+                    <span class="text-sm text-gray-600">{{ plan.count }} users × ₹{{ plan.price | int }}</span>
+                </div>
+                <div class="text-right">
+                    <span class="font-bold text-sm">₹{{ "{:,.0f}".format(plan.mrr) }}</span>
+                    <span class="text-xs text-green-600 ml-2">₹{{ "{:,.0f}".format(plan.profit) }} profit</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-gray-400 text-sm text-center py-4">No active subscriptions yet.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- 6-month trend -->
+<div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+    <h3 class="font-semibold text-gray-700 mb-4">6-Month Trend</h3>
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="text-left text-gray-400 text-xs border-b border-gray-100">
+                    <th class="pb-2 font-medium">Month</th>
+                    <th class="pb-2 font-medium text-right">Revenue</th>
+                    <th class="pb-2 font-medium text-right">Company Profit (20%)</th>
+                    <th class="pb-2 font-medium text-right">User Pool (80%)</th>
+                    <th class="pb-2 font-medium text-right">New Subs</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+                {% for row in monthly_trend %}
+                <tr>
+                    <td class="py-2.5 text-gray-700">{{ row.label }}</td>
+                    <td class="py-2.5 text-right font-medium">₹{{ "{:,.0f}".format(row.revenue) }}</td>
+                    <td class="py-2.5 text-right text-green-600">₹{{ "{:,.0f}".format(row.profit) }}</td>
+                    <td class="py-2.5 text-right text-brand-700">₹{{ "{:,.0f}".format(row.revenue * 0.80) }}</td>
+                    <td class="py-2.5 text-right text-gray-500">{{ row.subs }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
 {% endblock %}

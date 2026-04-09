@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 from fastapi import APIRouter, Request, Depends, HTTPException, Form
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
@@ -10,6 +10,14 @@ from app.models.prompt import Prompt
 from app.models.submission import Submission
 from app.models.subscription import UserSubscription
 from app.services.s3_service import create_presigned_post
+
+
+def _count_today_submissions(user_id, db: Session) -> int:
+    today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    return db.query(Submission).filter(
+        Submission.user_id == user_id,
+        Submission.submitted_at >= today_start,
+    ).count()
 
 router = APIRouter(tags=["submissions"])
 templates = Jinja2Templates(directory="app/templates")
@@ -56,6 +64,12 @@ async def presign_upload(
     ).first()
     if existing:
         raise HTTPException(status_code=400, detail="You have already submitted for this prompt")
+
+    # Enforce daily submission cap
+    max_daily = getattr(sub.plan, "max_daily_submissions", 2)
+    today_count = _count_today_submissions(current_user.id, db)
+    if today_count >= max_daily:
+        raise HTTPException(status_code=429, detail=f"Daily limit reached. Your plan allows {max_daily} submissions per day.")
 
     category_name = prompt.category.name
     try:
@@ -135,6 +149,12 @@ async def submit_prompt(
     ).first()
     if existing:
         raise HTTPException(status_code=400, detail="Already submitted")
+
+    # Enforce daily submission cap
+    max_daily = getattr(sub.plan, "max_daily_submissions", 2)
+    today_count = _count_today_submissions(current_user.id, db)
+    if today_count >= max_daily:
+        raise HTTPException(status_code=429, detail=f"Daily limit reached. Your plan allows {max_daily} submissions per day.")
 
     submission = Submission(
         user_id=current_user.id,

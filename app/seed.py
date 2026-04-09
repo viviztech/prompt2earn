@@ -16,24 +16,36 @@ def seed():
         if not db.query(SubscriptionPlan).first():
             plans = [
                 SubscriptionPlan(
-                    name="basic", display_name="Basic", price_inr=199,
+                    name="basic", display_name="Basic", price_inr=299,
                     duration_days=30, point_multiplier=1.0,
+                    max_daily_submissions=2,
+                    referral_bonus_points=24,   # 10% of ₹239 user pool
+                    daily_completion_bonus=5,
+                    company_profit_pct=20.0,
                     allowed_categories=["poster", "caption"],
-                    features=["Access to Poster prompts", "Access to Caption prompts", "Up to 30 prompts/month", "Email support"],
+                    features=["Poster & Caption prompts", "2 submissions/day", "Earn up to ₹240/month", "Referral bonus ₹24/invite", "Email support"],
                     is_active=True,
                 ),
                 SubscriptionPlan(
-                    name="pro", display_name="Pro", price_inr=399,
+                    name="pro", display_name="Pro", price_inr=499,
                     duration_days=30, point_multiplier=1.0,
+                    max_daily_submissions=3,
+                    referral_bonus_points=40,   # 10% of ₹399 user pool
+                    daily_completion_bonus=8,
+                    company_profit_pct=20.0,
                     allowed_categories=["poster", "caption", "video", "audio"],
-                    features=["All categories", "Up to 60 prompts/month", "Priority review", "Email support"],
+                    features=["All 4 categories", "3 submissions/day", "Earn up to ₹500/month", "Referral bonus ₹40/invite", "Priority review", "Email support"],
                     is_active=True,
                 ),
                 SubscriptionPlan(
-                    name="premium", display_name="Premium", price_inr=699,
+                    name="premium", display_name="Premium", price_inr=999,
                     duration_days=30, point_multiplier=1.5,
+                    max_daily_submissions=5,
+                    referral_bonus_points=80,   # 10% of ₹799 user pool
+                    daily_completion_bonus=16,
+                    company_profit_pct=20.0,
                     allowed_categories=["poster", "caption", "video", "audio"],
-                    features=["All categories", "Unlimited prompts", "1.5× point multiplier", "Early access to prompts", "Priority review", "Dedicated support"],
+                    features=["All 4 categories", "5 submissions/day", "1.5× point multiplier", "Earn up to ₹1,200/month", "Referral bonus ₹80/invite", "Early access", "Priority review", "Dedicated support"],
                     is_active=True,
                 ),
             ]
@@ -87,12 +99,12 @@ def seed():
             sample_prompts = [
                 Prompt(title="Diwali Celebration Poster",
                     description="Create a vibrant Diwali celebration poster for Instagram (1080×1080px). Include diyas, rangoli patterns, and festive text 'Happy Diwali'. Use warm golden and orange tones. Add a brand logo placeholder at the bottom.",
-                    category_id=poster_cat.id, point_value=50,
+                    category_id=poster_cat.id, point_value=10,  # Basic: 10, Pro: 10, Premium: 15
                     deadline=now + timedelta(days=1), visible_to=["basic", "pro", "premium"],
                     created_by=admin.id, is_active=True),
                 Prompt(title="Morning Motivation Instagram Caption",
                     description="Write 5 unique Instagram captions for a morning motivation post. Each caption should be 100-150 words, include 10 relevant hashtags, and end with a call-to-action. Tone: Energetic and positive. Target audience: Young professionals.",
-                    category_id=caption_cat.id, point_value=30,
+                    category_id=caption_cat.id, point_value=8,  # Basic: 8, Pro: 8, Premium: 12
                     deadline=now + timedelta(days=1), visible_to=["basic", "pro", "premium"],
                     created_by=admin.id, is_active=True),
             ]

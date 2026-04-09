@@ -72,7 +72,11 @@ scheduler = BackgroundScheduler()
 @app.on_event("startup")
 def start_scheduler():
     from app.tasks.expire_points import expire_points_job
+    from app.tasks.daily_bonuses import daily_completion_bonus_job, monthly_streak_bonus_job
+
     scheduler.add_job(expire_points_job, "cron", hour=2, minute=0)
+    scheduler.add_job(daily_completion_bonus_job, "cron", hour=0, minute=5)   # 00:05 UTC daily
+    scheduler.add_job(monthly_streak_bonus_job, "cron", day=1, hour=0, minute=10)  # 1st of month
     scheduler.start()
     logger.info("Scheduler started")
 

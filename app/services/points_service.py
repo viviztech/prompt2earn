@@ -31,6 +31,46 @@ def get_balance(user_id, db: Session) -> int:
     return max(0, result or 0)
 
 
+def _add_ledger(user_id, points: int, transaction_type: str, description: str,
+                db: Session, submission_id=None, redemption_id=None,
+                expires_at=None) -> PointsLedger:
+    current_balance = get_balance(user_id, db)
+    entry = PointsLedger(
+        user_id=user_id,
+        submission_id=submission_id,
+        redemption_id=redemption_id,
+        transaction_type=transaction_type,
+        points=points,
+        balance_after=current_balance + points,
+        description=description,
+        expires_at=expires_at,
+    )
+    db.add(entry)
+    return entry
+
+
+def _default_expiry():
+    return datetime.utcnow() + timedelta(days=settings.POINTS_EXPIRY_DAYS)
+
+
+def _update_streak(user, db: Session):
+    """Update current_streak and longest_streak based on last_active_date."""
+    today = datetime.utcnow().date()
+    last = user.last_active_date.date() if user.last_active_date else None
+
+    if last is None or last < today:
+        if last == today - timedelta(days=1):
+            user.current_streak = (user.current_streak or 0) + 1
+        elif last == today:
+            pass  # already counted today
+        else:
+            user.current_streak = 1
+
+        user.last_active_date = datetime.utcnow()
+        if (user.current_streak or 0) > (user.longest_streak or 0):
+            user.longest_streak = user.current_streak
+
+
 def award_points(submission_id, db: Session) -> int:
     submission = db.query(Submission).filter(Submission.id == submission_id).first()
     if not submission:
@@ -40,21 +80,48 @@ def award_points(submission_id, db: Session) -> int:
     multiplier = float(sub.plan.point_multiplier) if sub else 1.0
     points = int(submission.prompt.point_value * multiplier)
 
-    current_balance = get_balance(submission.user_id, db)
-    expires_at = datetime.utcnow() + timedelta(days=settings.POINTS_EXPIRY_DAYS)
-
-    ledger = PointsLedger(
+    _add_ledger(
         user_id=submission.user_id,
-        submission_id=submission.id,
-        transaction_type="earned",
         points=points,
-        balance_after=current_balance + points,
+        transaction_type="earned",
         description=f"Approved: {submission.prompt.title}",
-        expires_at=expires_at,
+        db=db,
+        submission_id=submission.id,
+        expires_at=_default_expiry(),
     )
     submission.points_awarded = points
     submission.status = "approved"
-    db.add(ledger)
+
+    # Update streak
+    from app.models.user import User
+    user = db.query(User).filter(User.id == submission.user_id).first()
+    if user:
+        _update_streak(user, db)
+
+        # Welcome bonus — one-time on first ever approval
+        if not user.welcome_bonus_paid:
+            _add_ledger(
+                user_id=user.id,
+                points=10,
+                transaction_type="bonus",
+                description="Welcome bonus — first submission approved!",
+                db=db,
+                expires_at=_default_expiry(),
+            )
+            user.welcome_bonus_paid = True
+
+        # Weekly streak bonus (every 7th consecutive day)
+        streak = user.current_streak or 0
+        if streak > 0 and streak % 7 == 0:
+            _add_ledger(
+                user_id=user.id,
+                points=20,
+                transaction_type="bonus",
+                description=f"🔥 {streak}-day streak bonus!",
+                db=db,
+                expires_at=_default_expiry(),
+            )
+
     db.commit()
     return points
 
@@ -63,51 +130,60 @@ def deduct_points(user_id, redemption_id, points: int, db: Session) -> bool:
     current_balance = get_balance(user_id, db)
     if current_balance < points:
         return False
-
-    ledger = PointsLedger(
+    _add_ledger(
         user_id=user_id,
         redemption_id=redemption_id,
-        transaction_type="redeemed",
         points=-points,
-        balance_after=current_balance - points,
-        description=f"Redemption request",
+        transaction_type="redeemed",
+        description="Redemption request",
+        db=db,
     )
-    db.add(ledger)
     db.commit()
     return True
 
 
 def restore_points(user_id, redemption_id, points: int, description: str, db: Session):
-    current_balance = get_balance(user_id, db)
-    ledger = PointsLedger(
+    _add_ledger(
         user_id=user_id,
         redemption_id=redemption_id,
-        transaction_type="restored",
         points=points,
-        balance_after=current_balance + points,
+        transaction_type="restored",
         description=description,
+        db=db,
+        expires_at=_default_expiry(),
     )
-    db.add(ledger)
     db.commit()
 
 
-def award_referral_bonus(referrer_id, referee_name: str, db: Session) -> int:
-    """Award bonus points to the referrer when their referee subscribes for the first time."""
-    bonus = settings.REFERRAL_BONUS_POINTS
-    current_balance = get_balance(referrer_id, db)
-    from datetime import timedelta
-    expires_at = datetime.utcnow() + timedelta(days=settings.POINTS_EXPIRY_DAYS)
-    ledger = PointsLedger(
+def award_referral_bonus(referrer_id, referee_name: str, db: Session,
+                         bonus_points: int = None) -> int:
+    """Award bonus to referrer when their referee subscribes.
+    Uses plan-specific bonus if provided, else falls back to config default."""
+    bonus = bonus_points if bonus_points is not None else settings.REFERRAL_BONUS_POINTS
+    _add_ledger(
         user_id=referrer_id,
-        transaction_type="bonus",
         points=bonus,
-        balance_after=current_balance + bonus,
+        transaction_type="bonus",
         description=f"Referral bonus — {referee_name} subscribed",
-        expires_at=expires_at,
+        db=db,
+        expires_at=_default_expiry(),
     )
-    db.add(ledger)
     db.commit()
     return bonus
+
+
+def award_daily_completion_bonus(user_id, bonus_points: int, db: Session) -> int:
+    """Award bonus when user completes all available prompts for the day."""
+    _add_ledger(
+        user_id=user_id,
+        points=bonus_points,
+        transaction_type="bonus",
+        description="🎯 Daily 100% completion bonus!",
+        db=db,
+        expires_at=_default_expiry(),
+    )
+    db.commit()
+    return bonus_points
 
 
 def get_leaderboard(db: Session, limit: int = 10) -> list:

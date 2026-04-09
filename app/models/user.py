@@ -33,6 +33,12 @@ class User(Base):
     referred_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
     referral_bonus_paid = Column(Boolean, default=False)  # True once bonus awarded to referrer
 
+    # Streak tracking
+    current_streak = Column(Integer, default=0)
+    longest_streak = Column(Integer, default=0)
+    last_active_date = Column(DateTime, nullable=True)  # date of last submission
+    welcome_bonus_paid = Column(Boolean, default=False)  # one-time first approval bonus
+
     subscriptions = relationship("UserSubscription", back_populates="user", lazy="dynamic")
     submissions = relationship("Submission", back_populates="user", lazy="dynamic", foreign_keys="Submission.user_id")
     points_ledger = relationship("PointsLedger", back_populates="user", lazy="dynamic")
