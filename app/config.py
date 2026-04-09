@@ -32,6 +32,7 @@ class Settings(BaseSettings):
     MINIMUM_REDEMPTION_POINTS: int = 500
     POINTS_PER_INR: int = 1
     POINTS_EXPIRY_DAYS: int = 180
+    REFERRAL_BONUS_POINTS: int = 100  # Points awarded to referrer when referee subscribes
 
     # Manual payment details shown to users
     MANUAL_UPI_ID: str = ""

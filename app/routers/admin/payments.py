@@ -9,6 +9,7 @@ from app.dependencies import require_admin
 from app.models.payment import PaymentTransaction
 from app.models.subscription import UserSubscription, SubscriptionPlan
 from app.services.s3_service import create_presigned_get_url
+from app.services.points_service import award_referral_bonus
 
 router = APIRouter(tags=["admin"])
 templates = Jinja2Templates(directory="app/templates")
@@ -98,6 +99,19 @@ async def approve_manual_payment(
     txn.reviewed_at = datetime.utcnow()
     txn.subscription_id = sub.id
     db.commit()
+
+    # Award referral bonus to referrer if applicable
+    from app.models.user import User
+    user = db.query(User).filter(User.id == txn.user_id).first()
+    if user and user.referred_by and not user.referral_bonus_paid:
+        sub_count = db.query(UserSubscription).filter(UserSubscription.user_id == user.id).count()
+        if sub_count <= 1:
+            try:
+                award_referral_bonus(user.referred_by, user.full_name or user.email, db)
+            except Exception:
+                pass
+            user.referral_bonus_paid = True
+            db.commit()
 
     return RedirectResponse(url="/admin/payments?status=pending_verification", status_code=302)
 

@@ -91,6 +91,25 @@ def restore_points(user_id, redemption_id, points: int, description: str, db: Se
     db.commit()
 
 
+def award_referral_bonus(referrer_id, referee_name: str, db: Session) -> int:
+    """Award bonus points to the referrer when their referee subscribes for the first time."""
+    bonus = settings.REFERRAL_BONUS_POINTS
+    current_balance = get_balance(referrer_id, db)
+    from datetime import timedelta
+    expires_at = datetime.utcnow() + timedelta(days=settings.POINTS_EXPIRY_DAYS)
+    ledger = PointsLedger(
+        user_id=referrer_id,
+        transaction_type="bonus",
+        points=bonus,
+        balance_after=current_balance + bonus,
+        description=f"Referral bonus — {referee_name} subscribed",
+        expires_at=expires_at,
+    )
+    db.add(ledger)
+    db.commit()
+    return bonus
+
+
 def get_leaderboard(db: Session, limit: int = 10) -> list:
     from app.models.user import User
     from sqlalchemy import desc

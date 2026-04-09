@@ -36,6 +36,7 @@
                 <div class="flex items-center gap-4">
                     {% if user %}
                         <a href="/wallet" class="text-sm text-gray-600 hover:text-brand-700 font-medium">Wallet</a>
+                        <a href="/referral" class="text-sm text-gray-600 hover:text-brand-700 font-medium">Referral</a>
                         <a href="/leaderboard" class="text-sm text-gray-600 hover:text-brand-700 font-medium">Leaderboard</a>
                         <a href="/profile" class="text-sm text-gray-600 hover:text-brand-700 font-medium">{{ user.full_name.split()[0] }}</a>
                         <form method="post" action="/auth/logout" class="inline">

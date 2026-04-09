@@ -23,7 +23,8 @@ limiter = Limiter(key_func=get_remote_address)
 
 @router.get("/register", response_class=HTMLResponse)
 async def register_page(request: Request):
-    return templates.TemplateResponse("auth/register.html", {"request": request})
+    ref_code = request.query_params.get("ref", "")
+    return templates.TemplateResponse("auth/register.html", {"request": request, "ref_code": ref_code})
 
 
 @router.post("/register")
@@ -34,15 +35,21 @@ async def register(
     email: str = Form(...),
     phone: str = Form(...),
     password: str = Form(...),
+    ref_code: str = Form(""),
     db: Session = Depends(get_db),
 ):
     existing = db.query(User).filter(User.email == email.lower().strip()).first()
     if existing:
         return templates.TemplateResponse(
             "auth/register.html",
-            {"request": request, "error": "Email already registered."},
+            {"request": request, "error": "Email already registered.", "ref_code": ref_code},
             status_code=400,
         )
+
+    # Resolve referrer
+    referrer = None
+    if ref_code:
+        referrer = db.query(User).filter(User.referral_code == ref_code.strip().upper()).first()
 
     otp = generate_otp()
     user = User(
@@ -53,6 +60,7 @@ async def register(
         otp_code=hash_password(otp),
         otp_expires_at=datetime.utcnow() + timedelta(minutes=10),
         is_verified=False,
+        referred_by=referrer.id if referrer else None,
     )
     db.add(user)
     db.commit()

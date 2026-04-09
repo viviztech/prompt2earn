@@ -11,11 +11,19 @@
             <p class="text-gray-500 mt-1">Start earning with AI today</p>
         </div>
 
+        {% if ref_code %}
+        <div class="bg-green-50 border border-green-200 text-green-700 rounded-lg px-4 py-3 mb-5 text-sm flex items-center gap-2">
+            <span>🎁</span>
+            <span>You were referred! You'll get bonus points after your first subscription.</span>
+        </div>
+        {% endif %}
+
         {% if error %}
         <div class="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 mb-6 text-sm">{{ error }}</div>
         {% endif %}
 
         <form method="post" action="/auth/register" class="space-y-4">
+            <input type="hidden" name="ref_code" value="{{ ref_code or '' }}">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
                 <input type="text" name="full_name" required placeholder="Your full name"
@@ -36,6 +44,13 @@
                 <input type="password" name="password" required placeholder="Minimum 8 characters"
                     class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-700 focus:border-transparent">
             </div>
+            {% if not ref_code %}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Referral Code <span class="text-gray-400 font-normal">(optional)</span></label>
+                <input type="text" name="ref_code" placeholder="Enter referral code"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-700 focus:border-transparent uppercase" style="text-transform:uppercase">
+            </div>
+            {% endif %}
             <button type="submit" class="w-full bg-brand-700 text-white py-3 rounded-lg font-semibold hover:bg-brand-800 transition text-sm">
                 Create Account
             </button>

@@ -15,11 +15,30 @@ from app.models.subscription import SubscriptionPlan, UserSubscription
 from app.models.payment import PaymentTransaction
 from app.services.razorpay_service import create_order, verify_payment_signature, verify_webhook_signature
 from app.services.s3_service import get_s3_client
+from app.services.points_service import award_referral_bonus
 from app.config import get_settings
 
 router = APIRouter(prefix="/subscriptions", tags=["subscription"])
 templates = Jinja2Templates(directory="app/templates")
 settings = get_settings()
+
+
+def _maybe_award_referral_bonus(user_id, db: Session):
+    """Award referral bonus to referrer on first-ever subscription of this user."""
+    from app.models.user import User
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user or not user.referred_by or user.referral_bonus_paid:
+        return
+    # Only award on first subscription
+    from app.models.subscription import UserSubscription
+    sub_count = db.query(UserSubscription).filter(UserSubscription.user_id == user_id).count()
+    if sub_count <= 1:  # the one just created counts as 1
+        try:
+            award_referral_bonus(user.referred_by, user.full_name or user.email, db)
+        except Exception as e:
+            logger.error(f"Referral bonus award failed: {e}")
+        user.referral_bonus_paid = True
+        db.commit()
 
 
 def _upload_screenshot_to_s3(file: UploadFile) -> str:
@@ -162,6 +181,7 @@ async def verify_payment(
         txn.subscription_id = sub.id
 
     db.commit()
+    _maybe_award_referral_bonus(current_user.id, db)
     return RedirectResponse(url="/subscriptions/success", status_code=302)
 
 
@@ -222,6 +242,7 @@ async def razorpay_webhook(request: Request, db: Session = Depends(get_db)):
         txn.subscription_id = sub.id
 
     db.commit()
+    _maybe_award_referral_bonus(user_id, db)
     return JSONResponse({"status": "ok"})
 
 
