@@ -1,0 +1,503 @@
+{% extends "base.html" %}
+{% block title %}Free AI Tools — Knowledge Bank | PromptEarn{% endblock %}
+{% block content %}
+
+<!-- Header -->
+<div class="text-center mb-10">
+    <div class="inline-flex items-center gap-2 bg-brand-100 text-brand-700 px-4 py-1.5 rounded-full text-sm font-semibold mb-4">
+        🧠 Knowledge Bank
+    </div>
+    <h1 class="text-3xl font-extrabold text-gray-800 mb-3">Free AI Tools for Every Category</h1>
+    <p class="text-gray-500 max-w-xl mx-auto text-sm leading-relaxed">
+        Use these 100% free AI tools to complete your daily prompts. No experience needed — pick a category, pick a tool, create and upload.
+    </p>
+</div>
+
+<!-- Category tabs -->
+<div class="flex flex-wrap justify-center gap-2 mb-8" id="tab-bar">
+    <button onclick="showTab('poster')" id="tab-poster"
+        class="tab-btn active-tab px-4 py-2 rounded-xl text-sm font-semibold transition">
+        🖼️ Social Media Poster
+    </button>
+    <button onclick="showTab('video')" id="tab-video"
+        class="tab-btn px-4 py-2 rounded-xl text-sm font-semibold transition">
+        🎬 Video
+    </button>
+    <button onclick="showTab('audio')" id="tab-audio"
+        class="tab-btn px-4 py-2 rounded-xl text-sm font-semibold transition">
+        🎙️ Audio / Voiceover
+    </button>
+    <button onclick="showTab('caption')" id="tab-caption"
+        class="tab-btn px-4 py-2 rounded-xl text-sm font-semibold transition">
+        ✍️ Blog / Caption
+    </button>
+</div>
+
+<!-- ─── POSTER TOOLS ──────────────────────────────────────────── -->
+<div id="section-poster" class="tab-section">
+    <div class="mb-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-1">🖼️ Social Media Poster & Image Generation</h2>
+        <p class="text-gray-500 text-sm">Create stunning AI-generated posters, banners, and social media graphics for free.</p>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+
+        {% set poster_tools = [
+            ("Canva AI", "https://canva.com", "🎨",
+             "bg-pink-50 border-pink-200", "text-pink-700",
+             "Magic Design + Text to Image. Upload your AI image or let Canva generate it. Best for Instagram, Facebook, WhatsApp posts.",
+             ["Magic Design", "AI Image generator", "1000+ templates", "Free forever plan"],
+             "Beginner", "green"),
+
+            ("Adobe Firefly", "https://firefly.adobe.com", "🔥",
+             "bg-orange-50 border-orange-200", "text-orange-700",
+             "Adobe's free generative AI. Type a description and get a high-quality image. Works directly in browser.",
+             ["Text to Image", "Generative Fill", "High resolution", "Commercial safe"],
+             "Beginner", "green"),
+
+            ("Microsoft Designer", "https://designer.microsoft.com", "💎",
+             "bg-blue-50 border-blue-200", "text-blue-700",
+             "Powered by DALL·E. Type your prompt, get a ready-to-post social media design. Free with Microsoft account.",
+             ["DALL·E 3 powered", "Social media sizes", "One-click designs", "Free with MS account"],
+             "Beginner", "green"),
+
+            ("Ideogram", "https://ideogram.ai", "🖼️",
+             "bg-purple-50 border-purple-200", "text-purple-700",
+             "Excellent at text inside images — great for posters with quotes or slogans. 10 free images/day.",
+             ["Text in images", "Poster layouts", "10 free/day", "High quality"],
+             "Beginner", "green"),
+
+            ("Leonardo AI", "https://leonardo.ai", "🦁",
+             "bg-yellow-50 border-yellow-200", "text-yellow-700",
+             "150 free tokens/day. Excellent for detailed artwork, character posters, product images.",
+             ["150 tokens/day free", "Multiple art styles", "HD images", "Image editing"],
+             "Intermediate", "yellow"),
+
+            ("Playground AI", "https://playground.com", "🛝",
+             "bg-green-50 border-green-200", "text-green-700",
+             "500 free images/day. Photorealistic and artistic styles. Great for product mockups and social content.",
+             ["500 free images/day", "Photorealistic", "Multiple models", "Easy editor"],
+             "Beginner", "green"),
+
+            ("Bing Image Creator", "https://www.bing.com/images/create", "🔷",
+             "bg-sky-50 border-sky-200", "text-sky-700",
+             "Free DALL·E 3 images via Microsoft Bing. No signup needed. Best for quick poster generation.",
+             ["DALL·E 3 free", "No subscription", "Fast generation", "4 images/prompt"],
+             "Beginner", "green"),
+
+            ("Stable Diffusion (Clipdrop)", "https://clipdrop.co/stable-diffusion", "⚡",
+             "bg-indigo-50 border-indigo-200", "text-indigo-700",
+             "Run Stable Diffusion free in browser. Great control over style, resolution and artistic direction.",
+             ["Free tier available", "Advanced controls", "Multiple styles", "High resolution"],
+             "Intermediate", "yellow"),
+
+            ("NightCafe", "https://creator.nightcafe.studio", "🌙",
+             "bg-gray-50 border-gray-200", "text-gray-700",
+             "Daily free credits. Multiple AI models. Community challenges and prompts to get inspiration.",
+             ["Daily free credits", "5+ AI models", "Community prompts", "Print quality"],
+             "Beginner", "green"),
+        ] %}
+
+        {% for name, url, icon, card_bg, accent, desc, features, level, level_color in poster_tools %}
+        <div class="bg-white rounded-2xl border-2 {{ card_bg.split()[1] }} p-5 flex flex-col hover:shadow-md transition">
+            <div class="flex items-start justify-between mb-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">{{ icon }}</span>
+                    <div>
+                        <h3 class="font-bold text-gray-800 text-sm">{{ name }}</h3>
+                        <span class="text-xs px-2 py-0.5 rounded-full font-medium
+                            {% if level_color == 'green' %}bg-green-100 text-green-700
+                            {% else %}bg-yellow-100 text-yellow-700{% endif %}">
+                            {{ level }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <p class="text-xs text-gray-500 mb-3 flex-1 leading-relaxed">{{ desc }}</p>
+            <div class="flex flex-wrap gap-1 mb-4">
+                {% for f in features %}
+                <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{{ f }}</span>
+                {% endfor %}
+            </div>
+            <a href="{{ url }}" target="_blank" rel="noopener"
+                class="block w-full text-center {{ accent }} border-2 {{ card_bg.split()[1] }} py-2 rounded-xl text-sm font-semibold hover:opacity-80 transition">
+                Open Tool →
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Tips -->
+    <div class="mt-8 bg-pink-50 border border-pink-200 rounded-2xl p-5">
+        <h3 class="font-bold text-pink-800 mb-3 text-sm">💡 Tips for Poster Submissions</h3>
+        <ul class="text-sm text-pink-700 space-y-1.5">
+            <li>• Read the prompt description carefully — note the required dimensions (e.g. 1080×1080 for Instagram)</li>
+            <li>• Use the prompt's keywords directly in your AI tool input for best results</li>
+            <li>• Download in PNG or JPG — WebP is also accepted. Minimum 800px width recommended</li>
+            <li>• Add text, logo placeholder or branding as instructed before uploading</li>
+            <li>• Save the image to your device first, then upload on the prompt page</li>
+        </ul>
+    </div>
+</div>
+
+<!-- ─── VIDEO TOOLS ──────────────────────────────────────────── -->
+<div id="section-video" class="tab-section hidden">
+    <div class="mb-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-1">🎬 AI Video Generation</h2>
+        <p class="text-gray-500 text-sm">Create short AI videos, slideshows, and animated content using free tools.</p>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+
+        {% set video_tools = [
+            ("CapCut AI", "https://capcut.com", "🎞️",
+             "bg-gray-50 border-gray-200", "text-gray-700",
+             "Free AI video editor with text-to-video, auto-captions, background remover and templates. Best all-in-one free option.",
+             ["Text to video", "AI captions", "500+ templates", "Mobile + Desktop"],
+             "Beginner", "green"),
+
+            ("InVideo AI", "https://invideo.io", "🎥",
+             "bg-blue-50 border-blue-200", "text-blue-700",
+             "Type a script or topic — AI builds a full video with stock footage, voiceover and music. 10 free exports/week.",
+             ["Script to video", "AI voiceover", "Stock footage", "10 free/week"],
+             "Beginner", "green"),
+
+            ("Canva Video", "https://canva.com/video", "🎨",
+             "bg-pink-50 border-pink-200", "text-pink-700",
+             "Drag-and-drop video maker with AI tools. Animate images, add AI voiceover, and create Reels/Shorts easily.",
+             ["Animate images", "AI voiceover", "Reels/Shorts sizes", "Free plan"],
+             "Beginner", "green"),
+
+            ("Runway ML (Gen-2)", "https://runwayml.com", "🚀",
+             "bg-purple-50 border-purple-200", "text-purple-700",
+             "Text to video AI. 125 free credits on signup. Generate 4-second AI videos from text descriptions.",
+             ["Text to video", "125 free credits", "Image to video", "4K export"],
+             "Intermediate", "yellow"),
+
+            ("Pika Labs", "https://pika.art", "⚡",
+             "bg-yellow-50 border-yellow-200", "text-yellow-700",
+             "Free tier with daily credits. Type a prompt and get a short animated video. Great for product demos.",
+             ["Text to video", "Daily free credits", "Image animation", "720p export"],
+             "Beginner", "green"),
+
+            ("Pictory AI", "https://pictory.ai", "🖼️",
+             "bg-green-50 border-green-200", "text-green-700",
+             "Convert scripts, blog posts or URLs into videos automatically. 3 free video projects to start.",
+             ["Script to video", "Blog to video", "Auto captions", "3 free projects"],
+             "Beginner", "green"),
+
+            ("Lumen5", "https://lumen5.com", "✨",
+             "bg-indigo-50 border-indigo-200", "text-indigo-700",
+             "Paste your blog post or script — Lumen5 AI builds a video with stock clips, text, and music. Free plan available.",
+             ["Blog to video", "AI scene builder", "Stock library", "Free plan"],
+             "Beginner", "green"),
+
+            ("Kaiber", "https://kaiber.ai", "🌊",
+             "bg-cyan-50 border-cyan-200", "text-cyan-700",
+             "Transform images and audio into animated videos. 7-day free trial. Great for music visualizers and art animations.",
+             ["Image animation", "Music sync", "7-day free trial", "Artistic styles"],
+             "Intermediate", "yellow"),
+
+            ("Veed.io", "https://veed.io", "🎬",
+             "bg-orange-50 border-orange-200", "text-orange-700",
+             "Online video editor with AI subtitles, background removal, and avatar presenter. 30-min free export.",
+             ["AI subtitles", "Avatar presenter", "Background remover", "30-min free"],
+             "Beginner", "green"),
+        ] %}
+
+        {% for name, url, icon, card_bg, accent, desc, features, level, level_color in video_tools %}
+        <div class="bg-white rounded-2xl border-2 {{ card_bg.split()[1] }} p-5 flex flex-col hover:shadow-md transition">
+            <div class="flex items-start justify-between mb-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">{{ icon }}</span>
+                    <div>
+                        <h3 class="font-bold text-gray-800 text-sm">{{ name }}</h3>
+                        <span class="text-xs px-2 py-0.5 rounded-full font-medium
+                            {% if level_color == 'green' %}bg-green-100 text-green-700
+                            {% else %}bg-yellow-100 text-yellow-700{% endif %}">
+                            {{ level }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <p class="text-xs text-gray-500 mb-3 flex-1 leading-relaxed">{{ desc }}</p>
+            <div class="flex flex-wrap gap-1 mb-4">
+                {% for f in features %}
+                <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{{ f }}</span>
+                {% endfor %}
+            </div>
+            <a href="{{ url }}" target="_blank" rel="noopener"
+                class="block w-full text-center {{ accent }} border-2 {{ card_bg.split()[1] }} py-2 rounded-xl text-sm font-semibold hover:opacity-80 transition">
+                Open Tool →
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="mt-8 bg-blue-50 border border-blue-200 rounded-2xl p-5">
+        <h3 class="font-bold text-blue-800 mb-3 text-sm">💡 Tips for Video Submissions</h3>
+        <ul class="text-sm text-blue-700 space-y-1.5">
+            <li>• Export in MP4 format — most widely accepted. MOV and WebM are also accepted</li>
+            <li>• Keep videos between 15–60 seconds unless the prompt specifies longer</li>
+            <li>• Add captions/subtitles if the prompt mentions "Instagram Reel" or "YouTube Short"</li>
+            <li>• Ensure the video is clear, not blurry — export at minimum 720p resolution</li>
+            <li>• File size limit is 500MB — compress if needed using HandBrake (free) or Veed.io</li>
+        </ul>
+    </div>
+</div>
+
+<!-- ─── AUDIO TOOLS ──────────────────────────────────────────── -->
+<div id="section-audio" class="tab-section hidden">
+    <div class="mb-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-1">🎙️ Audio & Voiceover Generation</h2>
+        <p class="text-gray-500 text-sm">Generate natural-sounding voiceovers, podcasts, and audio content with free AI tools.</p>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+
+        {% set audio_tools = [
+            ("ElevenLabs", "https://elevenlabs.io", "🎤",
+             "bg-orange-50 border-orange-200", "text-orange-700",
+             "Most realistic AI voice generator. Free tier: 10,000 characters/month. 30+ languages including Indian English, Tamil, Hindi.",
+             ["10K chars/month free", "30+ languages", "Tamil & Hindi", "Clone your voice"],
+             "Beginner", "green"),
+
+            ("Murf AI", "https://murf.ai", "🎙️",
+             "bg-purple-50 border-purple-200", "text-purple-700",
+             "Studio-quality AI voices. Free plan: 10 min/month. 120+ voices in 20 languages. Great for product explainers.",
+             ["10 min free/month", "120+ voices", "20 languages", "Background music"],
+             "Beginner", "green"),
+
+            ("TTSMaker", "https://ttsmaker.com", "🔊",
+             "bg-green-50 border-green-200", "text-green-700",
+             "100% free text-to-speech. No account needed. Supports Tamil, Telugu, Hindi, Malayalam and 50+ languages. Unlimited use.",
+             ["Completely free", "Tamil/Hindi/Telugu", "No signup needed", "Unlimited"],
+             "Beginner", "green"),
+
+            ("Narakeet", "https://narakeet.com", "🎵",
+             "bg-blue-50 border-blue-200", "text-blue-700",
+             "Free credits on signup. Upload a script, get a narrated audio file. Supports Indian languages. Good for educational content.",
+             ["Free credits", "Indian languages", "Script upload", "MP3 download"],
+             "Beginner", "green"),
+
+            ("VoiceRSS", "https://voicerss.org", "📢",
+             "bg-red-50 border-red-200", "text-red-700",
+             "Free API — 350 requests/day. Simple paste-and-listen interface. Good for short voiceovers and previews.",
+             ["350 free/day", "Simple interface", "MP3 output", "Multiple voices"],
+             "Beginner", "green"),
+
+            ("Speechify", "https://speechify.com", "📖",
+             "bg-teal-50 border-teal-200", "text-teal-700",
+             "Free plan with natural voices. Paste text or upload a document and convert to audio. Good for long-form narration.",
+             ["Natural voices", "Document upload", "Speed control", "Free plan"],
+             "Beginner", "green"),
+
+            ("Play.ht", "https://play.ht", "▶️",
+             "bg-indigo-50 border-indigo-200", "text-indigo-700",
+             "2,500 free words/month. Hyper-realistic voice cloning. 900+ AI voices, 142 languages including Indian English.",
+             ["2,500 words free", "900+ voices", "Indian English", "Ultra-realistic"],
+             "Intermediate", "yellow"),
+
+            ("Suno AI (Music)", "https://suno.com", "🎵",
+             "bg-pink-50 border-pink-200", "text-pink-700",
+             "Generate full songs with vocals and music from a text prompt. 50 free credits/day. Great for jingles and background music.",
+             ["50 credits/day free", "Full songs", "Lyrics + music", "Multiple genres"],
+             "Beginner", "green"),
+
+            ("Udio (Music)", "https://udio.com", "🎶",
+             "bg-yellow-50 border-yellow-200", "text-yellow-700",
+             "AI music generation. Free credits daily. Create background music, jingles, or full tracks with custom lyrics.",
+             ["Daily free credits", "Full track generation", "Custom lyrics", "HD audio"],
+             "Beginner", "green"),
+        ] %}
+
+        {% for name, url, icon, card_bg, accent, desc, features, level, level_color in audio_tools %}
+        <div class="bg-white rounded-2xl border-2 {{ card_bg.split()[1] }} p-5 flex flex-col hover:shadow-md transition">
+            <div class="flex items-start justify-between mb-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">{{ icon }}</span>
+                    <div>
+                        <h3 class="font-bold text-gray-800 text-sm">{{ name }}</h3>
+                        <span class="text-xs px-2 py-0.5 rounded-full font-medium
+                            {% if level_color == 'green' %}bg-green-100 text-green-700
+                            {% else %}bg-yellow-100 text-yellow-700{% endif %}">
+                            {{ level }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <p class="text-xs text-gray-500 mb-3 flex-1 leading-relaxed">{{ desc }}</p>
+            <div class="flex flex-wrap gap-1 mb-4">
+                {% for f in features %}
+                <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{{ f }}</span>
+                {% endfor %}
+            </div>
+            <a href="{{ url }}" target="_blank" rel="noopener"
+                class="block w-full text-center {{ accent }} border-2 {{ card_bg.split()[1] }} py-2 rounded-xl text-sm font-semibold hover:opacity-80 transition">
+                Open Tool →
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="mt-8 bg-orange-50 border border-orange-200 rounded-2xl p-5">
+        <h3 class="font-bold text-orange-800 mb-3 text-sm">💡 Tips for Audio / Voiceover Submissions</h3>
+        <ul class="text-sm text-orange-700 space-y-1.5">
+            <li>• Export as MP3 (preferred) or WAV. Keep file under 50MB</li>
+            <li>• Read the prompt — it will specify language (Tamil, Hindi, English) and tone (formal, friendly, energetic)</li>
+            <li>• Use ElevenLabs or Murf for the most natural-sounding voices</li>
+            <li>• For Tamil/regional language prompts, use TTSMaker or Narakeet — they handle Indian scripts well</li>
+            <li>• Keep the voiceover between 30 seconds and 3 minutes unless the prompt specifies otherwise</li>
+            <li>• Listen to your audio before uploading — check for unnatural pauses or mispronunciations</li>
+        </ul>
+    </div>
+</div>
+
+<!-- ─── CAPTION TOOLS ──────────────────────────────────────────── -->
+<div id="section-caption" class="tab-section hidden">
+    <div class="mb-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-1">✍️ Blog Post & Caption Writing</h2>
+        <p class="text-gray-500 text-sm">Generate high-quality blog posts, Instagram captions, product descriptions and marketing copy with free AI writers.</p>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+
+        {% set caption_tools = [
+            ("ChatGPT (Free)", "https://chat.openai.com", "🤖",
+             "bg-green-50 border-green-200", "text-green-700",
+             "GPT-4o free tier. Best for captions, blog drafts, hashtags, product descriptions. Just paste the prompt and ask it to write.",
+             ["GPT-4o free", "Any writing style", "Hashtag generation", "No limit on prompts"],
+             "Beginner", "green"),
+
+            ("Claude (Free)", "https://claude.ai", "✨",
+             "bg-purple-50 border-purple-200", "text-purple-700",
+             "Anthropic's Claude — excellent for long-form blog posts, nuanced writing, and following detailed instructions precisely.",
+             ["Long-form writing", "Follows instructions", "Natural tone", "Free plan"],
+             "Beginner", "green"),
+
+            ("Google Gemini", "https://gemini.google.com", "🔷",
+             "bg-blue-50 border-blue-200", "text-blue-700",
+             "Free with Google account. Good for research-backed blog posts, factual content, and combining search results into copy.",
+             ["Completely free", "Web search aware", "Google Docs export", "Multilingual"],
+             "Beginner", "green"),
+
+            ("Copy.ai", "https://copy.ai", "📝",
+             "bg-pink-50 border-pink-200", "text-pink-700",
+             "2,000 free words/month. Pre-built templates for Instagram captions, product descriptions, ad copy and blog intros.",
+             ["2,000 words free", "Instagram templates", "Ad copy", "100+ use cases"],
+             "Beginner", "green"),
+
+            ("Writesonic", "https://writesonic.com", "⚡",
+             "bg-yellow-50 border-yellow-200", "text-yellow-700",
+             "Free credits on signup. AI article writer, blog post generator, and social media content creator in one tool.",
+             ["Free credits", "Article writer", "Social media copy", "SEO focused"],
+             "Intermediate", "yellow"),
+
+            ("Rytr", "https://rytr.me", "🖊️",
+             "bg-teal-50 border-teal-200", "text-teal-700",
+             "10,000 characters free/month. 30+ use cases including blog sections, product descriptions, and Instagram captions.",
+             ["10K chars/month free", "30+ use cases", "Tone selector", "Multilingual"],
+             "Beginner", "green"),
+
+            ("Notion AI", "https://notion.so", "📓",
+             "bg-gray-50 border-gray-200", "text-gray-700",
+             "20 AI responses free. Write blog posts inside Notion with AI autocomplete, summarize, and improve writing features.",
+             ["20 free AI calls", "Blog drafting", "Improve writing", "Table of contents"],
+             "Beginner", "green"),
+
+            ("Simplified", "https://simplified.com", "🎯",
+             "bg-orange-50 border-orange-200", "text-orange-700",
+             "Free plan with 2,000 words/month. Designed for social media teams — captions, hashtags, and ad copy with one click.",
+             ["2,000 words free", "Hashtag generator", "Caption templates", "Social-first"],
+             "Beginner", "green"),
+
+            ("Perplexity AI", "https://perplexity.ai", "🔍",
+             "bg-indigo-50 border-indigo-200", "text-indigo-700",
+             "Free AI search + writing. Use it to research a topic and generate factual, well-sourced blog content. Free unlimited.",
+             ["Free unlimited", "Source citations", "Research-backed", "Up-to-date info"],
+             "Beginner", "green"),
+        ] %}
+
+        {% for name, url, icon, card_bg, accent, desc, features, level, level_color in caption_tools %}
+        <div class="bg-white rounded-2xl border-2 {{ card_bg.split()[1] }} p-5 flex flex-col hover:shadow-md transition">
+            <div class="flex items-start justify-between mb-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">{{ icon }}</span>
+                    <div>
+                        <h3 class="font-bold text-gray-800 text-sm">{{ name }}</h3>
+                        <span class="text-xs px-2 py-0.5 rounded-full font-medium
+                            {% if level_color == 'green' %}bg-green-100 text-green-700
+                            {% else %}bg-yellow-100 text-yellow-700{% endif %}">
+                            {{ level }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <p class="text-xs text-gray-500 mb-3 flex-1 leading-relaxed">{{ desc }}</p>
+            <div class="flex flex-wrap gap-1 mb-4">
+                {% for f in features %}
+                <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{{ f }}</span>
+                {% endfor %}
+            </div>
+            <a href="{{ url }}" target="_blank" rel="noopener"
+                class="block w-full text-center {{ accent }} border-2 {{ card_bg.split()[1] }} py-2 rounded-xl text-sm font-semibold hover:opacity-80 transition">
+                Open Tool →
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="mt-8 bg-green-50 border border-green-200 rounded-2xl p-5">
+        <h3 class="font-bold text-green-800 mb-3 text-sm">💡 Tips for Blog / Caption Submissions</h3>
+        <ul class="text-sm text-green-700 space-y-1.5">
+            <li>• Submit as a PDF or TXT file — both are accepted. Use Google Docs → Download as PDF</li>
+            <li>• Always follow the word count specified in the prompt (e.g. "5 captions, 100–150 words each")</li>
+            <li>• Include hashtags if the prompt asks for Instagram or social media content</li>
+            <li>• Use ChatGPT or Claude — paste the exact prompt description and ask it to follow it precisely</li>
+            <li>• For Tamil language captions, ask ChatGPT or Claude to "write in Tamil" at the end of your request</li>
+            <li>• Always proofread — AI can make factual errors, especially with brand names or local references</li>
+        </ul>
+    </div>
+</div>
+
+<!-- Bottom CTA for logged-out users -->
+{% if not user %}
+<div class="mt-12 bg-gradient-to-br from-brand-700 to-purple-900 rounded-2xl p-8 text-center text-white">
+    <h2 class="text-2xl font-extrabold mb-2">Ready to start earning?</h2>
+    <p class="text-purple-200 mb-6 text-sm">Use these free tools to complete daily prompts and earn real cash.</p>
+    <div class="flex flex-col sm:flex-row gap-3 justify-center">
+        <a href="/auth/register" class="bg-white text-brand-700 px-6 py-3 rounded-xl font-bold hover:bg-gray-100 transition">Create Free Account</a>
+        <a href="/subscriptions/plans" class="border-2 border-white text-white px-6 py-3 rounded-xl font-bold hover:bg-white hover:text-brand-700 transition">View Plans</a>
+    </div>
+</div>
+{% else %}
+<div class="mt-12 bg-brand-50 border border-brand-200 rounded-2xl p-6 text-center">
+    <p class="text-brand-700 font-semibold mb-3">Pick a tool above, complete today's prompts, and earn points!</p>
+    <a href="/dashboard" class="bg-brand-700 text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-brand-800 transition text-sm">Go to Dashboard →</a>
+</div>
+{% endif %}
+
+<style>
+.tab-btn { background: white; color: #6b7280; border: 2px solid #e5e7eb; }
+.active-tab { background: #7c3aed; color: white; border-color: #7c3aed; }
+</style>
+
+{% block scripts %}
+<script>
+function showTab(name) {
+    document.querySelectorAll('.tab-section').forEach(s => s.classList.add('hidden'));
+    document.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.remove('active-tab');
+        b.classList.add('bg-white', 'text-gray-500');
+    });
+    document.getElementById('section-' + name).classList.remove('hidden');
+    const btn = document.getElementById('tab-' + name);
+    btn.classList.add('active-tab');
+    btn.classList.remove('bg-white', 'text-gray-500');
+}
+// Handle URL hash on load
+const hash = window.location.hash.replace('#', '');
+if (['poster','video','audio','caption'].includes(hash)) showTab(hash);
+</script>
+{% endblock %}
+{% endblock %}

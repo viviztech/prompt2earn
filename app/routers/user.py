@@ -111,3 +111,13 @@ async def update_profile(
     current_user.phone = phone.strip()
     db.commit()
     return RedirectResponse(url="/profile?updated=1", status_code=302)
+
+
+@router.get("/tools", response_class=HTMLResponse)
+async def knowledge_bank(request: Request, db: Session = Depends(get_db)):
+    from app.dependencies import get_current_user_optional
+    current_user = get_current_user_optional(request, db)
+    return templates.TemplateResponse("user/tools.html", {
+        "request": request,
+        "user": current_user,
+    })

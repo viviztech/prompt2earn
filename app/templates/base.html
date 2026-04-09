@@ -38,6 +38,7 @@
                 <div class="hidden md:flex items-center gap-4">
                     {% if user %}
                         <a href="/dashboard" class="text-sm text-gray-600 hover:text-brand-700 font-medium">Dashboard</a>
+                        <a href="/tools" class="text-sm text-gray-600 hover:text-brand-700 font-medium">Tools</a>
                         <a href="/wallet" class="text-sm text-gray-600 hover:text-brand-700 font-medium">Wallet</a>
                         <a href="/referral" class="text-sm text-gray-600 hover:text-brand-700 font-medium">Referral</a>
                         <a href="/leaderboard" class="text-sm text-gray-600 hover:text-brand-700 font-medium">Leaderboard</a>
@@ -46,6 +47,7 @@
                             <button type="submit" class="text-sm text-gray-500 hover:text-red-600">Logout</button>
                         </form>
                     {% else %}
+                        <a href="/tools" class="text-sm text-gray-600 hover:text-brand-700 font-medium">Free AI Tools</a>
                         <a href="/auth/login" class="text-sm text-gray-600 hover:text-brand-700 font-medium">Login</a>
                         <a href="/auth/register" class="bg-brand-700 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-brand-800">Get Started</a>
                     {% endif %}
@@ -68,6 +70,7 @@
             <div class="px-4 py-3 space-y-1">
                 {% if user %}
                     <a href="/dashboard" class="block px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-brand-50 hover:text-brand-700">Dashboard</a>
+                    <a href="/tools" class="block px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-brand-50 hover:text-brand-700">Tools</a>
                     <a href="/wallet" class="block px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-brand-50 hover:text-brand-700">Wallet</a>
                     <a href="/referral" class="block px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-brand-50 hover:text-brand-700">Referral</a>
                     <a href="/leaderboard" class="block px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-brand-50 hover:text-brand-700">Leaderboard</a>
@@ -78,6 +81,7 @@
                         </form>
                     </div>
                 {% else %}
+                    <a href="/tools" class="block px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-brand-50 hover:text-brand-700">Free AI Tools</a>
                     <a href="/auth/login" class="block px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-brand-50 hover:text-brand-700">Login</a>
                     <a href="/auth/register" class="block px-3 py-2.5 rounded-lg text-sm font-medium bg-brand-700 text-white text-center">Get Started</a>
                 {% endif %}
