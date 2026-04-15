@@ -51,7 +51,7 @@ try:
             max_daily_submissions=1,
             referral_bonus_points=0,
             daily_completion_bonus=0,
-            company_profit_pct=100.0,
+            company_profit_pct=99.99,
             allowed_categories=["poster"],
             is_free=True,
             wallet_locked=True,
