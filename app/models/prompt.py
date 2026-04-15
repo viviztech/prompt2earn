@@ -39,6 +39,11 @@ class Prompt(Base):
     assigned_to = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True, index=True)
     assigned_at = Column(DateTime, nullable=True)
 
+    # Brand sponsorship
+    is_sponsored = Column(Boolean, default=False)
+    sponsor_name = Column(String, nullable=True)
+    sponsor_budget_inr = Column(Integer, nullable=True)  # how much brand paid
+
     category = relationship("PromptCategory", back_populates="prompts")
     creator = relationship("User", foreign_keys=[created_by])
     assignee = relationship("User", foreign_keys=[assigned_to])

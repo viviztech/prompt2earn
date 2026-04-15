@@ -58,6 +58,16 @@ async def submit_redemption(
     balance = get_balance(current_user.id, db)
     errors = []
 
+    # Block redemption for locked wallets (free plan)
+    from app.models.subscription import UserSubscription
+    active_sub = db.query(UserSubscription).filter(
+        UserSubscription.user_id == current_user.id,
+        UserSubscription.status == "active",
+        UserSubscription.expires_at > datetime.utcnow(),
+    ).first()
+    if active_sub and active_sub.plan.wallet_locked:
+        errors.append("Your wallet is locked on the Free plan. Upgrade to a paid plan to redeem earnings.")
+
     if points_requested < settings.MINIMUM_REDEMPTION_POINTS:
         errors.append(f"Minimum redemption is {settings.MINIMUM_REDEMPTION_POINTS} points.")
     if points_requested > balance:

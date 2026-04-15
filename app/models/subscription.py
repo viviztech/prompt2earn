@@ -10,7 +10,7 @@ class SubscriptionPlan(Base):
     __tablename__ = "subscription_plans"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    name = Column(Enum("basic", "pro", "premium", name="plan_name"), unique=True, nullable=False)
+    name = Column(Enum("free", "basic", "pro", "premium", "agency", name="plan_name"), unique=True, nullable=False)
     display_name = Column(String, nullable=False)
     price_inr = Column(Numeric(10, 2), nullable=False)
     duration_days = Column(Integer, nullable=False, default=30)
@@ -26,6 +26,8 @@ class SubscriptionPlan(Base):
     referral_bonus_points = Column(Integer, nullable=False, default=24)  # pts awarded to referrer
     daily_completion_bonus = Column(Integer, nullable=False, default=5)  # pts for 100% day
     company_profit_pct = Column(Numeric(4, 2), nullable=False, default=20.0)  # always 20%
+    is_free = Column(Boolean, default=False)  # free plan — wallet locked until upgrade
+    wallet_locked = Column(Boolean, default=False)  # earnings held until user subscribes to paid plan
 
     subscriptions = relationship("UserSubscription", back_populates="plan", lazy="dynamic")
 

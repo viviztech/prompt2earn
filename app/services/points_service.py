@@ -71,7 +71,7 @@ def _update_streak(user, db: Session):
             user.longest_streak = user.current_streak
 
 
-def award_points(submission_id, db: Session) -> int:
+def award_points(submission_id, db: Session, quality_score: int = 5) -> int:
     from app.services.settings_service import get_setting_int
     submission = db.query(Submission).filter(Submission.id == submission_id).first()
     if not submission:
@@ -79,7 +79,10 @@ def award_points(submission_id, db: Session) -> int:
 
     sub = get_active_subscription(submission.user_id, db)
     multiplier = float(sub.plan.point_multiplier) if sub else 1.0
-    points = int(submission.prompt.point_value * multiplier)
+    # Quality score 1-5 maps to 20%-100% of points
+    quality_pct = max(0.2, quality_score / 5.0)
+    points = int(submission.prompt.point_value * multiplier * quality_pct)
+    submission.quality_score = quality_score
 
     expiry_days = get_setting_int("points_expiry_days", db) or settings.POINTS_EXPIRY_DAYS
     expires_at = datetime.utcnow() + timedelta(days=expiry_days)
@@ -163,17 +166,34 @@ def restore_points(user_id, redemption_id, points: int, description: str, db: Se
 
 def award_referral_bonus(referrer_id, referee_name: str, db: Session,
                          bonus_points: int = None) -> int:
-    """Award bonus to referrer when their referee subscribes.
-    Uses plan-specific bonus if provided, else falls back to config default."""
+    """Award L1 bonus to referrer when their referee subscribes.
+    Also awards L2 bonus (5% of plan price) to referrer's referrer."""
+    from app.models.user import User
     bonus = bonus_points if bonus_points is not None else settings.REFERRAL_BONUS_POINTS
+
+    # L1 bonus — direct referrer
     _add_ledger(
         user_id=referrer_id,
         points=bonus,
         transaction_type="bonus",
-        description=f"Referral bonus — {referee_name} subscribed",
+        description=f"Referral bonus (L1) — {referee_name} subscribed",
         db=db,
         expires_at=_default_expiry(),
     )
+
+    # L2 bonus — referrer's referrer gets 5% of L1 bonus
+    referrer = db.query(User).filter(User.id == referrer_id).first()
+    if referrer and referrer.referred_by:
+        l2_bonus = max(1, int(bonus * 0.05))
+        _add_ledger(
+            user_id=referrer.referred_by,
+            points=l2_bonus,
+            transaction_type="bonus",
+            description=f"Referral bonus (L2) — {referee_name} joined via your network",
+            db=db,
+            expires_at=_default_expiry(),
+        )
+
     db.commit()
     return bonus
 

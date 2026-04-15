@@ -22,6 +22,7 @@ class Submission(Base):
     reviewed_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
     reviewed_at = Column(DateTime, nullable=True)
     points_awarded = Column(Integer, default=0)
+    quality_score = Column(Integer, nullable=True)  # 1–5 stars; partial points multiplier
     submitted_at = Column(DateTime, default=datetime.utcnow)
 
     user = relationship("User", back_populates="submissions", foreign_keys=[user_id])

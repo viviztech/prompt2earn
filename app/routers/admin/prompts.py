@@ -58,6 +58,9 @@ async def create_prompt(
     point_value: int = Form(...),
     deadline: str = Form(...),
     visible_to: list = Form(default=["basic", "pro", "premium"]),
+    is_sponsored: str = Form(None),
+    sponsor_name: str = Form(None),
+    sponsor_budget_inr: int = Form(None),
     current_user=Depends(require_admin),
     db: Session = Depends(get_db),
 ):
@@ -71,6 +74,9 @@ async def create_prompt(
         visible_to=visible_to,
         created_by=current_user.id,
         is_active=True,
+        is_sponsored=bool(is_sponsored),
+        sponsor_name=sponsor_name if is_sponsored else None,
+        sponsor_budget_inr=sponsor_budget_inr if is_sponsored else None,
     )
     db.add(prompt)
     db.commit()
@@ -107,6 +113,9 @@ async def update_prompt(
     point_value: int = Form(...),
     deadline: str = Form(...),
     visible_to: list = Form(default=["basic", "pro", "premium"]),
+    is_sponsored: str = Form(None),
+    sponsor_name: str = Form(None),
+    sponsor_budget_inr: int = Form(None),
     current_user=Depends(require_admin),
     db: Session = Depends(get_db),
 ):
@@ -119,6 +128,9 @@ async def update_prompt(
     prompt.point_value = point_value
     prompt.deadline = datetime.fromisoformat(deadline)
     prompt.visible_to = visible_to
+    prompt.is_sponsored = bool(is_sponsored)
+    prompt.sponsor_name = sponsor_name if is_sponsored else None
+    prompt.sponsor_budget_inr = sponsor_budget_inr if is_sponsored else None
     db.commit()
     return RedirectResponse(url="/admin/prompts", status_code=302)
 

@@ -16,6 +16,19 @@ def seed():
         if not db.query(SubscriptionPlan).first():
             plans = [
                 SubscriptionPlan(
+                    name="free", display_name="Free", price_inr=0,
+                    duration_days=30, point_multiplier=1.0,
+                    max_daily_submissions=1,
+                    referral_bonus_points=0,
+                    daily_completion_bonus=0,
+                    company_profit_pct=100.0,
+                    allowed_categories=["poster"],
+                    is_free=True,
+                    wallet_locked=True,
+                    features=["1 poster submission/day", "Earnings locked until you subscribe", "Unlock wallet by upgrading to any paid plan"],
+                    is_active=True,
+                ),
+                SubscriptionPlan(
                     name="basic", display_name="Basic", price_inr=999,
                     duration_days=30, point_multiplier=1.0,
                     max_daily_submissions=2,
@@ -46,6 +59,17 @@ def seed():
                     company_profit_pct=70.0,
                     allowed_categories=["poster", "caption", "video", "audio"],
                     features=["All 4 categories", "5 submissions/day", "1.5× point multiplier", "Earn up to ₹1,800/month", "Referral bonus ₹600/invite", "Early access", "Priority review", "Dedicated support"],
+                    is_active=True,
+                ),
+                SubscriptionPlan(
+                    name="agency", display_name="Agency", price_inr=14999,
+                    duration_days=30, point_multiplier=2.0,
+                    max_daily_submissions=15,
+                    referral_bonus_points=1500,
+                    daily_completion_bonus=100,
+                    company_profit_pct=70.0,
+                    allowed_categories=["poster", "caption", "video", "audio"],
+                    features=["All 4 categories", "15 submissions/day", "Earn up to ₹4,500/month", "2× point multiplier", "Team of 3 users", "Referral bonus ₹1,500/invite", "Dedicated account manager", "Priority review", "Custom prompt requests"],
                     is_active=True,
                 ),
             ]

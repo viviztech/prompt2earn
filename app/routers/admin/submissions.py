@@ -69,6 +69,7 @@ async def view_submission(
 async def approve_submission(
     request: Request,
     submission_id: str,
+    quality_score: int = Form(5),
     current_user=Depends(require_admin),
     db: Session = Depends(get_db),
 ):
@@ -78,10 +79,11 @@ async def approve_submission(
     if submission.status != "pending":
         raise HTTPException(status_code=400, detail="Submission already reviewed")
 
+    quality_score = max(1, min(5, quality_score))  # clamp 1–5
     submission.reviewed_by = current_user.id
     submission.reviewed_at = datetime.utcnow()
 
-    points = award_points(submission_id, db)
+    points = award_points(submission_id, db, quality_score=quality_score)
 
     send_approval_email(
         submission.user.email,

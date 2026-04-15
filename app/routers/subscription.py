@@ -24,6 +24,36 @@ templates = Jinja2Templates(directory="app/templates")
 settings = get_settings()
 
 
+def _maybe_award_renewal_bonus(user_id, plan, db: Session):
+    """Award loyalty bonus points on renewal subscriptions (2nd+ subscription)."""
+    from app.services.points_service import _add_ledger, _default_expiry
+    sub_count = db.query(UserSubscription).filter(UserSubscription.user_id == user_id).count()
+    if sub_count <= 1:
+        return  # first subscription, no renewal bonus
+    # Loyalty tiers: 3+ months = 10%, 6+ months = 20%
+    if sub_count >= 6:
+        bonus_pct = 0.20
+        label = "20% loyalty"
+    else:
+        bonus_pct = 0.10
+        label = "10% loyalty"
+    # Award bonus as % of plan's monthly point potential (max_daily * 5pts * 30days)
+    base_earn = int(plan.max_daily_submissions * 5 * 30 * float(plan.point_multiplier))
+    bonus_pts = max(10, int(base_earn * bonus_pct))
+    try:
+        _add_ledger(
+            user_id=user_id,
+            points=bonus_pts,
+            transaction_type="bonus",
+            description=f"🎉 Renewal {label} bonus — Month {sub_count}!",
+            db=db,
+            expires_at=_default_expiry(),
+        )
+        db.commit()
+    except Exception as e:
+        logger.error(f"Renewal bonus failed: {e}")
+
+
 def _maybe_award_referral_bonus(user_id, db: Session):
     """Award plan-based referral bonus to referrer on referee's first subscription."""
     from app.models.user import User
@@ -183,6 +213,7 @@ async def verify_payment(
 
     db.commit()
     _maybe_award_referral_bonus(current_user.id, db)
+    _maybe_award_renewal_bonus(current_user.id, plan, db)
     return RedirectResponse(url="/subscriptions/success", status_code=302)
 
 
