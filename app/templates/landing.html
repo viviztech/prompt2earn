@@ -34,16 +34,16 @@
     <div class="relative max-w-5xl mx-auto px-4 py-24 text-center">
         <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 text-purple-200 text-xs font-semibold px-4 py-1.5 rounded-full mb-6 fade-up">
             <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-            AI-Powered Earning Platform · 30% Monthly Returns
+            AI-Powered Earning Platform · Real Cash Every Month
         </div>
         <h1 class="text-5xl md:text-6xl font-extrabold mb-6 leading-tight fade-up" style="animation-delay:.1s">
             Turn AI Skills into<br><span class="gradient-text">Real Earnings</span>
         </h1>
         <p class="text-xl text-purple-200 mb-4 max-w-2xl mx-auto fade-up" style="animation-delay:.2s">
-            Get daily AI creative prompts, upload your work, and earn guaranteed monthly returns — for housewives, students & freelancers.
+            Get daily AI creative prompts, upload your work, and earn real cash every month — for housewives, students & freelancers.
         </p>
         <p class="text-purple-300 text-sm mb-10 fade-up" style="animation-delay:.3s">
-            Plans from ₹999 · Earn ₹300–₹1,800/month · No skills needed
+            Plans from ₹999 · Earn based on your submissions & quality · No prior skills needed
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center fade-up" style="animation-delay:.4s">
             <a href="/auth/register" class="shimmer-btn text-white px-10 py-4 rounded-xl font-bold text-lg hover:opacity-90 transition shadow-lg shadow-purple-900/40">
@@ -56,7 +56,7 @@
 
         <!-- Stats row -->
         <div class="grid grid-cols-3 gap-6 max-w-lg mx-auto mt-16 fade-up" style="animation-delay:.5s">
-            {% for stat in [("₹300+", "Min. Monthly Earn"), ("30%", "Guaranteed ROI"), ("24hrs", "Payout Speed")] %}
+            {% for stat in [("₹300+", "Starter Earnings"), ("5 pts", "Per Prompt"), ("24hrs", "Payout Speed")] %}
             <div class="text-center">
                 <div class="text-2xl font-extrabold text-white">{{ stat[0] }}</div>
                 <div class="text-xs text-purple-300 mt-1">{{ stat[1] }}</div>
@@ -122,19 +122,19 @@
     <div class="max-w-4xl mx-auto px-4 text-center">
         <span class="text-xs font-bold text-purple-300 tracking-widest uppercase bg-white/10 px-3 py-1 rounded-full">Pricing</span>
         <h2 class="text-3xl font-bold mt-4 mb-3">Simple, Transparent Plans</h2>
-        <p class="text-purple-200 mb-12">Invest once. Earn guaranteed 30% returns every month.</p>
+        <p class="text-purple-200 mb-12">Subscribe once. Earn every month based on your submissions and quality.</p>
         <div class="grid md:grid-cols-3 gap-5 mb-10">
             {% for plan in [
-                ("Basic", "₹999", "₹300", "2 submissions/day", "border-gray-700 bg-white/5"),
-                ("Pro", "₹2,999", "₹900", "3 submissions/day", "border-purple-500 bg-purple-900/40 ring-2 ring-purple-500"),
-                ("Premium", "₹5,999", "₹1,800", "5 submissions/day", "border-yellow-500/50 bg-yellow-900/20"),
+                ("Basic", "₹999", "₹198–₹264", "2 submissions/day · 1× pts", "border-gray-700 bg-white/5"),
+                ("Pro", "₹2,999", "₹356–₹475", "3 submissions/day · 1.2× pts", "border-purple-500 bg-purple-900/40 ring-2 ring-purple-500"),
+                ("Premium", "₹5,999", "₹594–₹792", "5 submissions/day · 1.5× pts", "border-yellow-500/50 bg-yellow-900/20"),
             ] %}
             <div class="rounded-2xl border {{ plan[4] }} p-6 card-hover">
                 <h3 class="font-bold text-lg mb-1">{{ plan[0] }}</h3>
                 <div class="text-3xl font-extrabold text-purple-300 mb-1">{{ plan[1] }}</div>
                 <div class="text-xs text-gray-400 mb-4">/30 days</div>
                 <div class="bg-green-500/20 border border-green-500/30 rounded-xl px-3 py-2 mb-4">
-                    <p class="text-xs text-green-400">Monthly Returns</p>
+                    <p class="text-xs text-green-400">Est. Monthly Earnings</p>
                     <p class="text-xl font-extrabold text-green-300">{{ plan[2] }}</p>
                 </div>
                 <p class="text-sm text-gray-400">{{ plan[3] }}</p>
