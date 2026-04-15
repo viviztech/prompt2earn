@@ -1,33 +1,91 @@
 {% extends "base.html" %}
 {% block title %}PromptEarn — Earn Real Money with AI{% endblock %}
+{% block extra_head %}
+<style>
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+    @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes spin-slow { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+    .float-anim { animation: float 3s ease-in-out infinite; }
+    .fade-up { animation: fadeUp 0.7s ease both; }
+    .shimmer-btn { background: linear-gradient(90deg,#7c3aed,#06b6d4,#7c3aed); background-size:200% auto; animation: shimmer 2.5s linear infinite; }
+    .gradient-text { background: linear-gradient(135deg,#7c3aed,#06b6d4); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .ai-grid { background-image: radial-gradient(rgba(124,58,237,0.1) 1px, transparent 1px); background-size: 28px 28px; }
+    .card-hover { transition: transform 0.3s, box-shadow 0.3s; }
+    .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(124,58,237,0.15); }
+    .spin-slow { animation: spin-slow 20s linear infinite; }
+</style>
+{% endblock %}
+{% block main_class %}px-0 max-w-none{% endblock %}
 {% block content %}
-<!-- Hero -->
-<section class="bg-gradient-to-br from-brand-700 to-purple-900 text-white py-20">
-    <div class="max-w-4xl mx-auto text-center px-4">
-        <h1 class="text-4xl md:text-5xl font-extrabold mb-6 leading-tight">Turn AI Skills into<br>Real Earnings</h1>
-        <p class="text-xl text-purple-200 mb-8 max-w-2xl mx-auto">Get daily creative prompts, create AI-powered content, upload your work, and earn real cash — for housewives, students & freelancers.</p>
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="/auth/register" class="bg-white text-brand-700 px-8 py-3 rounded-xl font-bold text-lg hover:bg-gray-100 transition">Start Earning Today</a>
-            <a href="/subscriptions/plans" class="border-2 border-white text-white px-8 py-3 rounded-xl font-bold text-lg hover:bg-white hover:text-brand-700 transition">View Plans</a>
+
+<!-- Hero Section -->
+<section class="relative overflow-hidden bg-gradient-to-br from-slate-950 via-purple-950 to-slate-900 text-white">
+    <div class="ai-grid absolute inset-0 opacity-60"></div>
+    <!-- Decorative orbs -->
+    <div class="absolute top-20 left-10 w-64 h-64 bg-purple-600 rounded-full blur-3xl opacity-15 pointer-events-none"></div>
+    <div class="absolute bottom-10 right-10 w-80 h-80 bg-cyan-600 rounded-full blur-3xl opacity-10 pointer-events-none"></div>
+    <!-- Floating dots -->
+    <div class="absolute top-16 left-16 w-2 h-2 bg-purple-400 rounded-full float-anim opacity-70"></div>
+    <div class="absolute top-32 right-24 w-3 h-3 bg-cyan-400 rounded-full float-anim opacity-50" style="animation-delay:.8s"></div>
+    <div class="absolute bottom-20 left-1/3 w-2 h-2 bg-pink-400 rounded-full float-anim opacity-60" style="animation-delay:.4s"></div>
+    <div class="absolute bottom-16 right-1/4 w-2 h-2 bg-yellow-400 rounded-full float-anim opacity-40" style="animation-delay:1.2s"></div>
+
+    <div class="relative max-w-5xl mx-auto px-4 py-24 text-center">
+        <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 text-purple-200 text-xs font-semibold px-4 py-1.5 rounded-full mb-6 fade-up">
+            <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+            AI-Powered Earning Platform · 30% Monthly Returns
+        </div>
+        <h1 class="text-5xl md:text-6xl font-extrabold mb-6 leading-tight fade-up" style="animation-delay:.1s">
+            Turn AI Skills into<br><span class="gradient-text">Real Earnings</span>
+        </h1>
+        <p class="text-xl text-purple-200 mb-4 max-w-2xl mx-auto fade-up" style="animation-delay:.2s">
+            Get daily AI creative prompts, upload your work, and earn guaranteed monthly returns — for housewives, students & freelancers.
+        </p>
+        <p class="text-purple-300 text-sm mb-10 fade-up" style="animation-delay:.3s">
+            Plans from ₹999 · Earn ₹300–₹1,800/month · No skills needed
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center fade-up" style="animation-delay:.4s">
+            <a href="/auth/register" class="shimmer-btn text-white px-10 py-4 rounded-xl font-bold text-lg hover:opacity-90 transition shadow-lg shadow-purple-900/40">
+                Start Earning Today →
+            </a>
+            <a href="/subscriptions/plans" class="border-2 border-white/30 text-white px-10 py-4 rounded-xl font-bold text-lg hover:bg-white/10 transition backdrop-blur-sm">
+                View Plans
+            </a>
+        </div>
+
+        <!-- Stats row -->
+        <div class="grid grid-cols-3 gap-6 max-w-lg mx-auto mt-16 fade-up" style="animation-delay:.5s">
+            {% for stat in [("₹300+", "Min. Monthly Earn"), ("30%", "Guaranteed ROI"), ("24hrs", "Payout Speed")] %}
+            <div class="text-center">
+                <div class="text-2xl font-extrabold text-white">{{ stat[0] }}</div>
+                <div class="text-xs text-purple-300 mt-1">{{ stat[1] }}</div>
+            </div>
+            {% endfor %}
         </div>
     </div>
 </section>
 
 <!-- How it works -->
-<section class="py-16 bg-white">
+<section class="py-20 bg-white">
     <div class="max-w-5xl mx-auto px-4">
-        <h2 class="text-3xl font-bold text-center text-gray-800 mb-12">How It Works</h2>
-        <div class="grid md:grid-cols-4 gap-8 text-center">
+        <div class="text-center mb-14">
+            <span class="text-xs font-bold text-brand-700 tracking-widest uppercase bg-brand-50 px-3 py-1 rounded-full">Simple Process</span>
+            <h2 class="text-3xl font-bold text-gray-800 mt-4">How It Works</h2>
+            <p class="text-gray-500 mt-2">Four simple steps to start earning from home</p>
+        </div>
+        <div class="grid md:grid-cols-4 gap-8">
             {% for step in [
-                ("1", "Subscribe", "Choose a plan that fits your goals and start working immediately."),
-                ("2", "Get Prompts", "Receive daily creative prompts — posters, videos, audio, captions."),
-                ("3", "Create & Upload", "Use any AI tool on your device to create the content and upload it."),
-                ("4", "Earn & Redeem", "Get points when approved. Redeem for real cash to your bank/UPI.")
+                ("1", "🎯", "Subscribe", "Choose a plan from ₹999 and unlock daily earning prompts immediately."),
+                ("2", "📋", "Get Prompts", "Receive daily AI creative prompts — posters, videos, audio, captions."),
+                ("3", "🤖", "Create & Upload", "Use any free AI tool to create the content and upload it in seconds."),
+                ("4", "💰", "Earn & Redeem", "Get approved and redeem your earnings directly to your bank or UPI.")
             ] %}
-            <div class="flex flex-col items-center">
-                <div class="w-12 h-12 bg-brand-700 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4">{{ step[0] }}</div>
-                <h3 class="font-bold text-gray-800 mb-2">{{ step[1] }}</h3>
-                <p class="text-gray-500 text-sm">{{ step[2] }}</p>
+            <div class="card-hover bg-white rounded-2xl p-6 border border-gray-100 shadow-sm text-center relative">
+                <div class="absolute -top-3 -right-3 w-7 h-7 bg-brand-700 text-white text-xs font-bold rounded-full flex items-center justify-center">{{ step[0] }}</div>
+                <div class="text-4xl mb-4">{{ step[1] }}</div>
+                <h3 class="font-bold text-gray-800 mb-2">{{ step[2] }}</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">{{ step[3] }}</p>
             </div>
             {% endfor %}
         </div>
@@ -35,32 +93,73 @@
 </section>
 
 <!-- Content Types -->
-<section class="py-16 bg-gray-50">
+<section class="py-20 bg-gray-50">
     <div class="max-w-5xl mx-auto px-4">
-        <h2 class="text-3xl font-bold text-center text-gray-800 mb-12">What You'll Create</h2>
-        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="text-center mb-14">
+            <span class="text-xs font-bold text-cyan-700 tracking-widest uppercase bg-cyan-50 px-3 py-1 rounded-full">AI Content Categories</span>
+            <h2 class="text-3xl font-bold text-gray-800 mt-4">What You'll Create</h2>
+            <p class="text-gray-500 mt-2">Use free AI tools to complete any of these categories</p>
+        </div>
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
             {% for item in [
-                ("🖼️", "Social Media Posters", "Instagram, Facebook & Twitter visuals"),
-                ("🎬", "Videos & Reels", "Short-form AI-generated video content"),
-                ("🎙️", "Audio & Voiceovers", "Narrations, podcasts, AI voice clips"),
-                ("✍️", "Blog & Captions", "SEO copy, captions, article snippets")
+                ("🖼️", "Social Media Posters", "Instagram, Facebook & Twitter visuals", "bg-pink-50 border-pink-200", "text-pink-600"),
+                ("🎬", "Videos & Reels", "Short-form AI-generated video content", "bg-blue-50 border-blue-200", "text-blue-600"),
+                ("🎙️", "Audio & Voiceovers", "Narrations, podcasts, AI voice clips", "bg-yellow-50 border-yellow-200", "text-yellow-600"),
+                ("✍️", "Blog & Captions", "SEO copy, captions, article snippets", "bg-green-50 border-green-200", "text-green-600")
             ] %}
-            <div class="bg-white rounded-xl p-6 shadow-sm text-center border border-gray-100">
+            <div class="card-hover {{ item[3] }} border rounded-2xl p-6 text-center">
                 <div class="text-4xl mb-3">{{ item[0] }}</div>
                 <h3 class="font-bold text-gray-800 mb-1">{{ item[1] }}</h3>
-                <p class="text-gray-500 text-sm">{{ item[2] }}</p>
+                <p class="{{ item[4] }} text-sm">{{ item[2] }}</p>
             </div>
             {% endfor %}
         </div>
     </div>
 </section>
 
-<!-- CTA -->
-<section class="py-16 bg-brand-700 text-white text-center">
-    <div class="max-w-2xl mx-auto px-4">
-        <h2 class="text-3xl font-bold mb-4">Ready to Start Earning?</h2>
-        <p class="text-purple-200 mb-8">Join thousands of creators earning real money from home.</p>
-        <a href="/auth/register" class="bg-white text-brand-700 px-10 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition">Register Now — It's Free to Join</a>
+<!-- Pricing preview -->
+<section class="py-20 bg-gradient-to-br from-slate-900 to-purple-950 text-white">
+    <div class="max-w-4xl mx-auto px-4 text-center">
+        <span class="text-xs font-bold text-purple-300 tracking-widest uppercase bg-white/10 px-3 py-1 rounded-full">Pricing</span>
+        <h2 class="text-3xl font-bold mt-4 mb-3">Simple, Transparent Plans</h2>
+        <p class="text-purple-200 mb-12">Invest once. Earn guaranteed 30% returns every month.</p>
+        <div class="grid md:grid-cols-3 gap-5 mb-10">
+            {% for plan in [
+                ("Basic", "₹999", "₹300", "2 submissions/day", "border-gray-700 bg-white/5"),
+                ("Pro", "₹2,999", "₹900", "3 submissions/day", "border-purple-500 bg-purple-900/40 ring-2 ring-purple-500"),
+                ("Premium", "₹5,999", "₹1,800", "5 submissions/day", "border-yellow-500/50 bg-yellow-900/20"),
+            ] %}
+            <div class="rounded-2xl border {{ plan[4] }} p-6 card-hover">
+                <h3 class="font-bold text-lg mb-1">{{ plan[0] }}</h3>
+                <div class="text-3xl font-extrabold text-purple-300 mb-1">{{ plan[1] }}</div>
+                <div class="text-xs text-gray-400 mb-4">/30 days</div>
+                <div class="bg-green-500/20 border border-green-500/30 rounded-xl px-3 py-2 mb-4">
+                    <p class="text-xs text-green-400">Monthly Returns</p>
+                    <p class="text-xl font-extrabold text-green-300">{{ plan[2] }}</p>
+                </div>
+                <p class="text-sm text-gray-400">{{ plan[3] }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        <a href="/subscriptions/plans" class="inline-block shimmer-btn text-white px-10 py-4 rounded-xl font-bold text-lg hover:opacity-90 transition shadow-lg">
+            See All Plans & Features →
+        </a>
     </div>
 </section>
+
+<!-- CTA -->
+<section class="py-20 bg-white">
+    <div class="max-w-2xl mx-auto px-4 text-center">
+        <div class="w-16 h-16 bg-gradient-to-br from-purple-600 to-cyan-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-purple-200">
+            <span class="text-white font-bold text-2xl">PE</span>
+        </div>
+        <h2 class="text-3xl font-bold text-gray-800 mb-4">Ready to Start Earning?</h2>
+        <p class="text-gray-500 mb-8">Join thousands of creators earning real money from home using AI tools.</p>
+        <a href="/auth/register" class="shimmer-btn inline-block text-white px-10 py-4 rounded-xl font-bold text-lg hover:opacity-90 transition shadow-lg shadow-purple-200">
+            Register Now — It's Free to Join
+        </a>
+        <p class="text-xs text-gray-400 mt-4">No credit card required to register · Plans start at ₹999</p>
+    </div>
+</section>
+
 {% endblock %}

@@ -1,27 +1,46 @@
 {% extends "base.html" %}
 {% block title %}Dashboard — PromptEarn{% endblock %}
+{% block extra_head %}
+<style>
+    @keyframes pulse-soft { 0%,100%{opacity:1} 50%{opacity:0.6} }
+    .pulse-soft { animation: pulse-soft 2s ease-in-out infinite; }
+    .card-hover { transition: transform 0.2s, box-shadow 0.2s; }
+    .card-hover:hover { transform: translateY(-3px); box-shadow: 0 12px 24px rgba(124,58,237,0.1); }
+    .gradient-text { background: linear-gradient(135deg,#7c3aed,#06b6d4); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+</style>
+{% endblock %}
 {% block content %}
-<div class="flex gap-2 items-center mb-2">
-    <h1 class="text-2xl font-bold text-gray-800">Today's Prompts</h1>
-    <span class="bg-brand-100 text-brand-700 text-xs font-semibold px-2.5 py-1 rounded-full">{{ active_sub.plan.display_name }}</span>
+
+<!-- Header -->
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <div class="flex items-center gap-2 mb-1">
+            <h1 class="text-2xl font-bold text-gray-800">Today's Prompts</h1>
+            <span class="bg-gradient-to-r from-brand-700 to-cyan-500 text-white text-xs font-semibold px-2.5 py-1 rounded-full">{{ active_sub.plan.display_name }}</span>
+        </div>
+        <p class="text-gray-500 text-sm">Complete prompts and earn points. Points = cash!</p>
+    </div>
+    <div class="hidden md:flex items-center gap-1.5 bg-green-50 border border-green-200 text-green-700 text-xs font-semibold px-3 py-1.5 rounded-full">
+        <span class="w-2 h-2 bg-green-500 rounded-full pulse-soft"></span>
+        Active
+    </div>
 </div>
-<p class="text-gray-500 mb-6 text-sm">Complete prompts and earn points. Points = cash!</p>
 
 <!-- Stats bar -->
 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-    <div class="bg-white rounded-xl p-4 shadow-sm text-center border border-gray-100">
-        <div class="text-2xl font-bold text-brand-700">{{ balance }}</div>
-        <div class="text-xs text-gray-500 mt-1">Points Balance</div>
+    <div class="card-hover bg-gradient-to-br from-brand-700 to-purple-800 rounded-xl p-4 shadow-sm text-center text-white">
+        <div class="text-2xl font-bold">{{ balance }}</div>
+        <div class="text-xs text-purple-200 mt-1">Points Balance</div>
     </div>
-    <div class="bg-white rounded-xl p-4 shadow-sm text-center border border-gray-100">
+    <div class="card-hover bg-white rounded-xl p-4 shadow-sm text-center border border-gray-100">
         <div class="text-2xl font-bold text-green-600">{{ today_count }}</div>
         <div class="text-xs text-gray-500 mt-1">Submitted Today</div>
     </div>
-    <div class="bg-white rounded-xl p-4 shadow-sm text-center border border-gray-100">
+    <div class="card-hover bg-white rounded-xl p-4 shadow-sm text-center border border-gray-100">
         <div class="text-2xl font-bold text-orange-500">🔥 {{ user.current_streak or 0 }}</div>
         <div class="text-xs text-gray-500 mt-1">Day Streak</div>
     </div>
-    <div class="bg-white rounded-xl p-4 shadow-sm text-center border border-gray-100">
+    <div class="card-hover bg-white rounded-xl p-4 shadow-sm text-center border border-gray-100">
         <div class="text-2xl font-bold text-gray-700">{{ prompts|length }}</div>
         <div class="text-xs text-gray-500 mt-1">Available</div>
     </div>
@@ -38,7 +57,10 @@
         </span>
     </div>
     <div class="w-full bg-gray-100 rounded-full h-2.5">
-        <div class="h-2.5 rounded-full transition-all {% if today_count >= max_daily %}bg-green-500{% else %}bg-brand-700{% endif %}" style="width: {{ [pct, 100] | min }}%"></div>
+        <div class="h-2.5 rounded-full transition-all
+            {% if today_count >= max_daily %}bg-green-500
+            {% else %}bg-gradient-to-r from-brand-700 to-cyan-500{% endif %}"
+            style="width: {{ [pct, 100] | min }}%"></div>
     </div>
     {% if today_count >= max_daily %}
     <p class="text-xs text-green-600 font-medium mt-2">🎯 Daily limit reached! Come back tomorrow for more prompts.</p>
@@ -50,7 +72,7 @@
 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
     {% for prompt in prompts %}
     {% set is_done = prompt.id in submitted_ids %}
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 flex flex-col {% if is_done %}opacity-70{% endif %}">
+    <div class="card-hover bg-white rounded-xl shadow-sm border border-gray-100 p-5 flex flex-col {% if is_done %}opacity-60{% endif %}">
         <div class="flex items-center justify-between mb-3">
             <span class="text-xs font-semibold px-2 py-1 rounded-full
                 {% if prompt.category.name == 'poster' %}bg-pink-100 text-pink-700
@@ -59,16 +81,16 @@
                 {% else %}bg-green-100 text-green-700{% endif %}">
                 {{ prompt.category.display_name }}
             </span>
-            <span class="text-brand-700 font-bold text-sm">+{{ prompt.point_value }} pts</span>
+            <span class="gradient-text font-bold text-sm">+{{ prompt.point_value }} pts</span>
         </div>
         <h3 class="font-semibold text-gray-800 mb-2">{{ prompt.title }}</h3>
         <p class="text-gray-500 text-xs mb-4 flex-1 line-clamp-2">{{ prompt.description }}</p>
         <div class="flex items-center justify-between">
             <span class="text-xs text-gray-400">Due: {{ prompt.deadline.strftime('%b %d, %I:%M %p') }}</span>
             {% if is_done %}
-            <span class="text-green-600 text-xs font-semibold">✓ Submitted</span>
+            <span class="text-green-600 text-xs font-semibold bg-green-50 px-2 py-1 rounded-lg">✓ Submitted</span>
             {% else %}
-            <a href="/prompts/{{ prompt.id }}" class="bg-brand-700 text-white text-xs px-4 py-2 rounded-lg hover:bg-brand-800 transition font-medium">Start →</a>
+            <a href="/prompts/{{ prompt.id }}" class="bg-gradient-to-r from-brand-700 to-cyan-500 text-white text-xs px-4 py-2 rounded-lg hover:opacity-90 transition font-medium">Start →</a>
             {% endif %}
         </div>
     </div>
@@ -77,7 +99,7 @@
 {% else %}
 <div class="text-center py-20 text-gray-400">
     <div class="text-5xl mb-4">🎉</div>
-    <p class="text-lg font-semibold">All caught up! No more prompts for now.</p>
+    <p class="text-lg font-semibold text-gray-600">All caught up! No more prompts for now.</p>
     <p class="text-sm mt-2">New prompts are added daily. Check back tomorrow!</p>
 </div>
 {% endif %}

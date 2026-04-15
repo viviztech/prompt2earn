@@ -130,8 +130,13 @@ async function submitWork() {
         Object.entries(fields).forEach(([k, v]) => formData.append(k, v));
         formData.append('file', selectedFile);
 
-        const uploadRes = await fetch(url, {method: 'POST', body: formData});
-        if (uploadRes.status !== 204 && uploadRes.status !== 200) throw new Error('Upload to S3 failed');
+        let uploadRes;
+        try {
+            uploadRes = await fetch(url, {method: 'POST', body: formData});
+        } catch (netErr) {
+            throw new Error('Upload failed: could not reach storage server. Please try again.');
+        }
+        if (uploadRes.status !== 204 && uploadRes.status !== 200) throw new Error(`Upload to S3 failed (status ${uploadRes.status})`);
 
         document.getElementById('progress-bar').style.width = '100%';
         document.getElementById('progress-text').textContent = '100%';

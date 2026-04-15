@@ -80,7 +80,6 @@ async def approve_submission(
 
     submission.reviewed_by = current_user.id
     submission.reviewed_at = datetime.utcnow()
-    db.flush()
 
     points = award_points(submission_id, db)
 

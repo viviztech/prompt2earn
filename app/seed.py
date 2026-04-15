@@ -16,36 +16,36 @@ def seed():
         if not db.query(SubscriptionPlan).first():
             plans = [
                 SubscriptionPlan(
-                    name="basic", display_name="Basic", price_inr=299,
+                    name="basic", display_name="Basic", price_inr=999,
                     duration_days=30, point_multiplier=1.0,
                     max_daily_submissions=2,
-                    referral_bonus_points=24,   # 10% of ₹239 user pool
-                    daily_completion_bonus=5,
-                    company_profit_pct=20.0,
+                    referral_bonus_points=100,   # 10% of ₹999
+                    daily_completion_bonus=10,
+                    company_profit_pct=70.0,
                     allowed_categories=["poster", "caption"],
-                    features=["Poster & Caption prompts", "2 submissions/day", "Earn up to ₹240/month", "Referral bonus ₹24/invite", "Email support"],
+                    features=["Poster & Caption prompts", "2 submissions/day", "Earn up to ₹300/month", "Referral bonus ₹100/invite", "Email support"],
                     is_active=True,
                 ),
                 SubscriptionPlan(
-                    name="pro", display_name="Pro", price_inr=499,
-                    duration_days=30, point_multiplier=1.0,
+                    name="pro", display_name="Pro", price_inr=2999,
+                    duration_days=30, point_multiplier=1.2,
                     max_daily_submissions=3,
-                    referral_bonus_points=40,   # 10% of ₹399 user pool
-                    daily_completion_bonus=8,
-                    company_profit_pct=20.0,
+                    referral_bonus_points=300,   # 10% of ₹2,999
+                    daily_completion_bonus=20,
+                    company_profit_pct=70.0,
                     allowed_categories=["poster", "caption", "video", "audio"],
-                    features=["All 4 categories", "3 submissions/day", "Earn up to ₹500/month", "Referral bonus ₹40/invite", "Priority review", "Email support"],
+                    features=["All 4 categories", "3 submissions/day", "Earn up to ₹900/month", "1.2× point multiplier", "Referral bonus ₹300/invite", "Priority review", "Email support"],
                     is_active=True,
                 ),
                 SubscriptionPlan(
-                    name="premium", display_name="Premium", price_inr=999,
+                    name="premium", display_name="Premium", price_inr=5999,
                     duration_days=30, point_multiplier=1.5,
                     max_daily_submissions=5,
-                    referral_bonus_points=80,   # 10% of ₹799 user pool
-                    daily_completion_bonus=16,
-                    company_profit_pct=20.0,
+                    referral_bonus_points=600,   # 10% of ₹5,999
+                    daily_completion_bonus=40,
+                    company_profit_pct=70.0,
                     allowed_categories=["poster", "caption", "video", "audio"],
-                    features=["All 4 categories", "5 submissions/day", "1.5× point multiplier", "Earn up to ₹1,200/month", "Referral bonus ₹80/invite", "Early access", "Priority review", "Dedicated support"],
+                    features=["All 4 categories", "5 submissions/day", "1.5× point multiplier", "Earn up to ₹1,800/month", "Referral bonus ₹600/invite", "Early access", "Priority review", "Dedicated support"],
                     is_active=True,
                 ),
             ]

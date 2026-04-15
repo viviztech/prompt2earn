@@ -1,64 +1,86 @@
 {% extends "base.html" %}
 {% block title %}Register — PromptEarn{% endblock %}
+{% block extra_head %}
+<style>
+    @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+    .shimmer-btn { background: linear-gradient(90deg,#7c3aed,#06b6d4,#7c3aed); background-size:200% auto; animation: shimmer 2.5s linear infinite; }
+    .ai-grid { background-image: radial-gradient(rgba(124,58,237,0.07) 1px, transparent 1px); background-size: 24px 24px; }
+</style>
+{% endblock %}
 {% block content %}
-<div class="min-h-screen flex items-center justify-center -mt-8">
-    <div class="bg-white rounded-2xl shadow-lg p-8 w-full max-w-md">
-        <div class="text-center mb-8">
-            <div class="w-16 h-16 bg-brand-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <span class="text-white font-bold text-2xl">PE</span>
+<div class="min-h-screen flex items-center justify-center -mt-8 py-8">
+    <div class="w-full max-w-md">
+        <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+            <!-- Top banner -->
+            <div class="ai-grid bg-gradient-to-br from-slate-900 to-purple-950 p-8 text-center">
+                <div class="w-16 h-16 bg-gradient-to-br from-brand-700 to-cyan-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-purple-900/40">
+                    <span class="text-white font-bold text-2xl">PE</span>
+                </div>
+                <h1 class="text-2xl font-bold text-white">Create Account</h1>
+                <p class="text-purple-300 mt-1 text-sm">Start earning with AI today</p>
+                <div class="flex items-center justify-center gap-4 mt-3">
+                    {% for stat in [("₹999", "Min. Plan"), ("30%", "ROI"), ("Daily", "Earnings")] %}
+                    <div class="text-center">
+                        <div class="text-sm font-bold text-white">{{ stat[0] }}</div>
+                        <div class="text-xs text-purple-400">{{ stat[1] }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
-            <h1 class="text-2xl font-bold text-gray-800">Create Account</h1>
-            <p class="text-gray-500 mt-1">Start earning with AI today</p>
+
+            <div class="p-8">
+                {% if ref_code %}
+                <div class="bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3 mb-5 text-sm flex items-center gap-2">
+                    <span>🎁</span>
+                    <span>You were referred! You'll get bonus points after your first subscription.</span>
+                </div>
+                {% endif %}
+
+                {% if error %}
+                <div class="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 mb-5 text-sm">{{ error }}</div>
+                {% endif %}
+
+                <form method="post" action="/auth/register" class="space-y-4">
+                    <input type="hidden" name="ref_code" value="{{ ref_code or '' }}">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                        <input type="text" name="full_name" required placeholder="Your full name"
+                            class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-700 focus:border-transparent transition bg-gray-50">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input type="email" name="email" required placeholder="you@example.com"
+                            class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-700 focus:border-transparent transition bg-gray-50">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                        <input type="tel" name="phone" required placeholder="+91 99999 99999"
+                            class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-700 focus:border-transparent transition bg-gray-50">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <input type="password" name="password" required placeholder="Minimum 8 characters"
+                            class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-700 focus:border-transparent transition bg-gray-50">
+                    </div>
+                    {% if not ref_code %}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Referral Code <span class="text-gray-400 font-normal">(optional)</span></label>
+                        <input type="text" name="ref_code" placeholder="Enter referral code"
+                            class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-700 focus:border-transparent transition bg-gray-50 uppercase" style="text-transform:uppercase">
+                    </div>
+                    {% endif %}
+                    <button type="submit" class="w-full shimmer-btn text-white py-3 rounded-xl font-bold hover:opacity-90 transition text-sm mt-2">
+                        Create Account →
+                    </button>
+                </form>
+
+                <p class="text-center text-sm text-gray-500 mt-6">
+                    Already have an account? <a href="/auth/login" class="text-brand-700 font-semibold hover:underline">Sign in</a>
+                </p>
+            </div>
         </div>
 
-        {% if ref_code %}
-        <div class="bg-green-50 border border-green-200 text-green-700 rounded-lg px-4 py-3 mb-5 text-sm flex items-center gap-2">
-            <span>🎁</span>
-            <span>You were referred! You'll get bonus points after your first subscription.</span>
-        </div>
-        {% endif %}
-
-        {% if error %}
-        <div class="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 mb-6 text-sm">{{ error }}</div>
-        {% endif %}
-
-        <form method="post" action="/auth/register" class="space-y-4">
-            <input type="hidden" name="ref_code" value="{{ ref_code or '' }}">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                <input type="text" name="full_name" required placeholder="Your full name"
-                    class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-700 focus:border-transparent">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                <input type="email" name="email" required placeholder="you@example.com"
-                    class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-700 focus:border-transparent">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                <input type="tel" name="phone" required placeholder="+91 99999 99999"
-                    class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-700 focus:border-transparent">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                <input type="password" name="password" required placeholder="Minimum 8 characters"
-                    class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-700 focus:border-transparent">
-            </div>
-            {% if not ref_code %}
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Referral Code <span class="text-gray-400 font-normal">(optional)</span></label>
-                <input type="text" name="ref_code" placeholder="Enter referral code"
-                    class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-700 focus:border-transparent uppercase" style="text-transform:uppercase">
-            </div>
-            {% endif %}
-            <button type="submit" class="w-full bg-brand-700 text-white py-3 rounded-lg font-semibold hover:bg-brand-800 transition text-sm">
-                Create Account
-            </button>
-        </form>
-
-        <p class="text-center text-sm text-gray-500 mt-6">
-            Already have an account? <a href="/auth/login" class="text-brand-700 font-medium hover:underline">Sign in</a>
-        </p>
+        <p class="text-center text-xs text-gray-400 mt-4">Free to register · Plans from ₹999/month</p>
     </div>
 </div>
 {% endblock %}
