@@ -155,7 +155,7 @@
 <!-- Earnings Calculator -->
 <div class="max-w-5xl mx-auto mb-12 bg-gradient-to-br from-slate-900 to-purple-950 rounded-2xl p-6 border border-purple-800/40 text-white">
     <h3 class="text-lg font-bold mb-1 text-center">📊 Earnings Estimator</h3>
-    <p class="text-purple-300 text-sm text-center mb-5">Based on {{ plan.max_daily_submissions if plans else '' }} submissions/day × 5 pts × approval rate</p>
+    <p class="text-purple-300 text-sm text-center mb-5">Based on submissions/day × 5 pts × approval rate</p>
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
         {% for plan in plans if plan.price_inr > 0 %}
         {% set m_low = (plan.max_daily_submissions * 5 * 22 * plan.point_multiplier | float * 0.60) | int %}
