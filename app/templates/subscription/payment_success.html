@@ -1,13 +1,61 @@
 {% extends "base.html" %}
 {% block title %}Subscribed! — PromptEarn{% endblock %}
+{% block extra_head %}
+<style>
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+    @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+    .float-anim { animation: float 3s ease-in-out infinite; }
+    .shimmer-btn { background: linear-gradient(90deg,#7c3aed,#06b6d4,#7c3aed); background-size:200% auto; animation: shimmer 2.5s linear infinite; }
+    .fade-up { animation: fadeUp 0.6s ease both; }
+    .ai-grid { background-image: radial-gradient(rgba(124,58,237,0.08) 1px, transparent 1px); background-size: 24px 24px; }
+</style>
+{% endblock %}
 {% block content %}
-<div class="max-w-md mx-auto text-center py-16">
-    <div class="text-6xl mb-6">🎉</div>
-    <h1 class="text-3xl font-bold text-gray-800 mb-3">You're Subscribed!</h1>
-    {% if subscription %}
-    <p class="text-gray-500 mb-2">{{ subscription.plan.display_name }} plan</p>
-    <p class="text-sm text-gray-400 mb-8">Active until {{ subscription.expires_at.strftime('%B %d, %Y') }}</p>
-    {% endif %}
-    <a href="/dashboard" class="bg-brand-700 text-white px-8 py-3 rounded-xl font-bold text-lg hover:bg-brand-800 transition">Start Earning Now →</a>
+<div class="ai-grid relative overflow-hidden bg-gradient-to-br from-slate-950 via-purple-950 to-slate-900 min-h-screen text-white -mx-4 sm:-mx-6 lg:-mx-8 -mt-6 flex items-center justify-center py-20 px-4">
+    <!-- floating dots -->
+    <div class="absolute top-16 left-16 w-2 h-2 bg-purple-400 rounded-full float-anim opacity-60"></div>
+    <div class="absolute top-24 right-20 w-3 h-3 bg-cyan-400 rounded-full float-anim opacity-40" style="animation-delay:.8s"></div>
+    <div class="absolute bottom-20 left-1/4 w-2 h-2 bg-pink-400 rounded-full float-anim opacity-50" style="animation-delay:.4s"></div>
+    <div class="absolute bottom-16 right-1/3 w-2 h-2 bg-yellow-400 rounded-full float-anim opacity-40" style="animation-delay:1.2s"></div>
+
+    <div class="relative text-center max-w-md mx-auto fade-up">
+        <!-- Success icon -->
+        <div class="w-24 h-24 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-green-500/30 float-anim">
+            <span class="text-5xl">🎉</span>
+        </div>
+
+        <h1 class="text-3xl font-extrabold mb-2">You're Subscribed!</h1>
+
+        {% if subscription %}
+        <div class="inline-flex items-center gap-2 bg-white/10 border border-white/20 px-4 py-2 rounded-full text-purple-200 text-sm font-semibold mb-2">
+            <span class="w-2 h-2 bg-green-400 rounded-full"></span>
+            {{ subscription.plan.display_name }} Plan — Active
+        </div>
+        <p class="text-purple-400 text-sm mb-8">Active until {{ subscription.expires_at.strftime('%B %d, %Y') }}</p>
+        {% else %}
+        <p class="text-purple-300 text-sm mb-8">Your plan is now active. Start earning today!</p>
+        {% endif %}
+
+        <!-- What to do next -->
+        <div class="bg-white/10 border border-white/20 rounded-2xl p-5 mb-8 text-left">
+            <p class="text-sm font-semibold text-white mb-3">What's next?</p>
+            <div class="space-y-2.5 text-sm text-purple-200">
+                <div class="flex items-center gap-2"><span class="text-green-400">✓</span> Check your daily prompts on the dashboard</div>
+                <div class="flex items-center gap-2"><span class="text-green-400">✓</span> Use free AI tools to complete tasks</div>
+                <div class="flex items-center gap-2"><span class="text-green-400">✓</span> Submit your work to earn points</div>
+                <div class="flex items-center gap-2"><span class="text-green-400">✓</span> Invite friends for extra referral bonuses</div>
+            </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+            <a href="/dashboard" class="shimmer-btn text-white px-8 py-3 rounded-xl font-bold text-base hover:opacity-90 transition shadow-lg">
+                Start Earning Now →
+            </a>
+            <a href="/referral" class="border border-white/30 text-white px-8 py-3 rounded-xl font-semibold text-base hover:bg-white/10 transition">
+                Invite Friends
+            </a>
+        </div>
+    </div>
 </div>
 {% endblock %}

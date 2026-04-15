@@ -1,28 +1,80 @@
 {% extends "base.html" %}
 {% block title %}Leaderboard — PromptEarn{% endblock %}
+{% block extra_head %}
+<style>
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+    .float-anim { animation: float 3s ease-in-out infinite; }
+    .gradient-text { background: linear-gradient(135deg,#7c3aed,#06b6d4); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .ai-grid { background-image: radial-gradient(rgba(124,58,237,0.06) 1px, transparent 1px); background-size: 24px 24px; }
+</style>
+{% endblock %}
 {% block content %}
-<h1 class="text-2xl font-bold text-gray-800 mb-2">Leaderboard</h1>
-<p class="text-gray-500 mb-6 text-sm">Top earners this month</p>
+
+<!-- Header -->
+<div class="ai-grid relative overflow-hidden bg-gradient-to-br from-slate-950 via-purple-950 to-slate-900 text-white py-8 px-6 -mx-4 sm:-mx-6 lg:-mx-8 mb-6 rounded-b-3xl">
+    <div class="absolute top-4 right-16 w-2 h-2 bg-cyan-400 rounded-full float-anim opacity-40" style="animation-delay:.8s"></div>
+    <div class="absolute bottom-4 left-1/4 w-1.5 h-1.5 bg-yellow-400 rounded-full float-anim opacity-50" style="animation-delay:.4s"></div>
+    <div class="relative">
+        <h1 class="text-2xl font-bold text-white mb-1">🏆 Leaderboard</h1>
+        <p class="text-purple-300 text-sm">Top earners this month — keep submitting to climb the ranks!</p>
+    </div>
+</div>
+
+<!-- Top 3 podium (if enough users) -->
+{% if top_users | length >= 3 %}
+<div class="grid grid-cols-3 gap-3 max-w-md mx-auto mb-8">
+    {% for pos, idx in [('2nd', 1), ('1st', 0), ('3rd', 2)] %}
+    {% set u = top_users[idx] %}
+    <div class="text-center {% if pos == '1st' %}-mt-4{% endif %}">
+        <div class="{% if pos == '1st' %}w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-400{% elif pos == '2nd' %}w-12 h-12 bg-gradient-to-br from-gray-300 to-gray-400{% else %}w-12 h-12 bg-gradient-to-br from-amber-600 to-amber-700{% endif %} rounded-full flex items-center justify-center mx-auto mb-2 text-white font-bold {% if pos == '1st' %}text-xl{% else %}text-base{% endif %}">
+            {{ (u.name or '?')[0].upper() }}
+        </div>
+        <p class="text-xs font-semibold text-gray-700 truncate">{{ (u.name or 'Anonymous')[:10] }}</p>
+        <p class="text-xs text-brand-700 font-bold">{{ u.points }} pts</p>
+        <div class="mt-1 text-xs {% if pos == '1st' %}text-yellow-500 font-bold{% elif pos == '2nd' %}text-gray-500{% else %}text-amber-600{% endif %}">
+            {{ pos }}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
     {% for u in top_users %}
-    <div class="flex items-center gap-4 px-6 py-4 border-b border-gray-50 last:border-0 {% if u.rank <= 3 %}bg-gradient-to-r from-yellow-50 to-white{% endif %}">
-        <div class="w-8 h-8 flex items-center justify-center rounded-full font-bold text-sm
-            {% if u.rank == 1 %}bg-yellow-400 text-white
-            {% elif u.rank == 2 %}bg-gray-300 text-gray-700
-            {% elif u.rank == 3 %}bg-amber-600 text-white
+    <div class="flex items-center gap-4 px-6 py-4 border-b border-gray-50 last:border-0
+        {% if u.rank == 1 %}bg-gradient-to-r from-yellow-50 via-orange-50 to-white
+        {% elif u.rank == 2 %}bg-gradient-to-r from-gray-50 to-white
+        {% elif u.rank == 3 %}bg-gradient-to-r from-amber-50 to-white{% endif %}">
+        <!-- Rank badge -->
+        <div class="w-9 h-9 flex items-center justify-center rounded-full font-bold text-sm flex-shrink-0
+            {% if u.rank == 1 %}bg-gradient-to-br from-yellow-400 to-orange-400 text-white shadow-md
+            {% elif u.rank == 2 %}bg-gradient-to-br from-gray-300 to-gray-400 text-white
+            {% elif u.rank == 3 %}bg-gradient-to-br from-amber-600 to-amber-700 text-white
             {% else %}bg-gray-100 text-gray-500{% endif %}">
-            {{ u.rank }}
+            {% if u.rank <= 3 %}{{ ['🥇','🥈','🥉'][u.rank - 1] }}{% else %}{{ u.rank }}{% endif %}
         </div>
-        <div class="flex-1">
-            <p class="font-semibold text-gray-800">{{ u.name or 'Anonymous' }}</p>
+        <!-- Avatar -->
+        <div class="w-9 h-9 bg-gradient-to-br from-brand-100 to-cyan-100 rounded-full flex items-center justify-center text-brand-700 font-bold text-sm flex-shrink-0">
+            {{ (u.name or '?')[0].upper() }}
         </div>
-        <div class="text-right">
+        <div class="flex-1 min-w-0">
+            <p class="font-semibold text-gray-800 truncate">{{ u.name or 'Anonymous' }}</p>
+        </div>
+        <div class="text-right flex-shrink-0">
             <span class="font-bold text-brand-700">{{ u.points }}</span>
             <span class="text-gray-400 text-xs ml-1">pts</span>
+            <p class="text-xs text-gray-400 mt-0.5">= ₹{{ u.points }}</p>
         </div>
     </div>
     {% else %}
-    <div class="text-center py-12 text-gray-400">No data yet. Be the first to earn!</div>
+    <div class="text-center py-16 text-gray-400">
+        <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-3">
+            <span class="text-3xl">🏆</span>
+        </div>
+        <p class="text-sm font-medium text-gray-600">No data yet</p>
+        <p class="text-xs mt-1">Be the first to earn and top the charts!</p>
+        <a href="/dashboard" class="inline-block mt-4 bg-gradient-to-r from-brand-700 to-cyan-500 text-white px-5 py-2 rounded-xl text-sm font-semibold hover:opacity-90 transition">Start Earning →</a>
+    </div>
     {% endfor %}
 </div>
 {% endblock %}

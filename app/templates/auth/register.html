@@ -3,8 +3,10 @@
 {% block extra_head %}
 <style>
     @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
     .shimmer-btn { background: linear-gradient(90deg,#7c3aed,#06b6d4,#7c3aed); background-size:200% auto; animation: shimmer 2.5s linear infinite; }
     .ai-grid { background-image: radial-gradient(rgba(124,58,237,0.07) 1px, transparent 1px); background-size: 24px 24px; }
+    .float-anim { animation: float 3s ease-in-out infinite; }
 </style>
 {% endblock %}
 {% block content %}
@@ -12,14 +14,17 @@
     <div class="w-full max-w-md">
         <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
             <!-- Top banner -->
-            <div class="ai-grid bg-gradient-to-br from-slate-900 to-purple-950 p-8 text-center">
-                <div class="w-16 h-16 bg-gradient-to-br from-brand-700 to-cyan-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-purple-900/40">
+            <div class="ai-grid bg-gradient-to-br from-slate-900 to-purple-950 p-8 text-center relative overflow-hidden">
+                <div class="absolute top-4 left-8 w-1.5 h-1.5 bg-purple-400 rounded-full float-anim opacity-60"></div>
+                <div class="absolute top-8 right-10 w-2 h-2 bg-cyan-400 rounded-full float-anim opacity-40" style="animation-delay:.8s"></div>
+                <div class="absolute bottom-4 left-1/3 w-1.5 h-1.5 bg-pink-400 rounded-full float-anim opacity-50" style="animation-delay:.4s"></div>
+                <div class="w-16 h-16 bg-gradient-to-br from-brand-700 to-cyan-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-purple-900/40 relative">
                     <span class="text-white font-bold text-2xl">PE</span>
                 </div>
                 <h1 class="text-2xl font-bold text-white">Create Account</h1>
                 <p class="text-purple-300 mt-1 text-sm">Start earning with AI today</p>
-                <div class="flex items-center justify-center gap-4 mt-3">
-                    {% for stat in [("₹999", "Min. Plan"), ("30%", "ROI"), ("Daily", "Earnings")] %}
+                <div class="flex items-center justify-center gap-6 mt-4">
+                    {% for stat in [("₹999", "Min. Plan"), ("5 pts", "Per Prompt"), ("Daily", "Earnings")] %}
                     <div class="text-center">
                         <div class="text-sm font-bold text-white">{{ stat[0] }}</div>
                         <div class="text-xs text-purple-400">{{ stat[1] }}</div>
@@ -80,7 +85,7 @@
             </div>
         </div>
 
-        <p class="text-center text-xs text-gray-400 mt-4">Free to register · Plans from ₹999/month</p>
+        <p class="text-center text-xs text-gray-400 mt-4">Free to register · Plans from ₹999 · Earn based on your submissions</p>
     </div>
 </div>
 {% endblock %}

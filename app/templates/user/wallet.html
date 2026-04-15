@@ -1,7 +1,27 @@
 {% extends "base.html" %}
 {% block title %}Wallet — PromptEarn{% endblock %}
+{% block extra_head %}
+<style>
+    @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+    .float-anim { animation: float 3s ease-in-out infinite; }
+    .card-hover { transition: transform 0.2s, box-shadow 0.2s; }
+    .card-hover:hover { transform: translateY(-3px); box-shadow: 0 12px 24px rgba(124,58,237,0.12); }
+    .gradient-text { background: linear-gradient(135deg,#7c3aed,#06b6d4); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .ai-grid { background-image: radial-gradient(rgba(124,58,237,0.06) 1px, transparent 1px); background-size: 24px 24px; }
+</style>
+{% endblock %}
 {% block content %}
-<h1 class="text-2xl font-bold text-gray-800 mb-6">My Wallet</h1>
+
+<!-- Header -->
+<div class="ai-grid relative overflow-hidden bg-gradient-to-br from-slate-950 via-purple-950 to-slate-900 text-white py-8 px-6 -mx-4 sm:-mx-6 lg:-mx-8 mb-6 rounded-b-3xl">
+    <div class="absolute top-4 right-16 w-2 h-2 bg-cyan-400 rounded-full float-anim opacity-40" style="animation-delay:.8s"></div>
+    <div class="absolute bottom-4 left-1/4 w-1.5 h-1.5 bg-pink-400 rounded-full float-anim opacity-50" style="animation-delay:.4s"></div>
+    <div class="relative">
+        <h1 class="text-2xl font-bold text-white mb-1">My Wallet</h1>
+        <p class="text-purple-300 text-sm">Track your earnings, referral bonuses & cash redemptions</p>
+    </div>
+</div>
 
 {% if active_sub and active_sub.plan.wallet_locked %}
 <!-- Locked wallet banner for free plan -->
@@ -18,21 +38,23 @@
 
 <!-- Top stats -->
 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-    <div class="md:col-span-2 bg-gradient-to-br from-brand-700 to-purple-900 rounded-2xl p-6 text-white">
+    <div class="md:col-span-2 card-hover bg-gradient-to-br from-brand-700 to-purple-900 rounded-2xl p-6 text-white">
         <p class="text-purple-200 text-sm mb-1">Available Balance</p>
         <div class="text-5xl font-extrabold mb-1">{{ balance }}</div>
-        <p class="text-purple-300 text-sm mb-4">points &nbsp;·&nbsp; ₹{{ balance }} cash value</p>
-        <div class="flex gap-2">
-            <a href="/redeem" class="bg-white text-brand-700 px-4 py-2 rounded-xl font-semibold text-sm hover:bg-gray-100 transition">Redeem Cash</a>
-            <a href="/referral" class="border border-purple-400 text-purple-200 px-4 py-2 rounded-xl font-semibold text-sm hover:bg-purple-800 transition">Invite &amp; Earn</a>
+        <p class="text-purple-300 text-sm mb-5">points &nbsp;·&nbsp; <span class="text-white font-semibold">₹{{ balance }}</span> cash value</p>
+        <div class="flex gap-2 flex-wrap">
+            {% if active_sub and not active_sub.plan.wallet_locked %}
+            <a href="/redeem" class="bg-white text-brand-700 px-4 py-2 rounded-xl font-semibold text-sm hover:bg-gray-100 transition">💸 Redeem Cash</a>
+            {% endif %}
+            <a href="/referral" class="border border-purple-400 text-purple-200 px-4 py-2 rounded-xl font-semibold text-sm hover:bg-purple-800 transition">👥 Invite &amp; Earn</a>
         </div>
     </div>
-    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+    <div class="card-hover bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
         <p class="text-gray-400 text-xs mb-1">Total Earned</p>
         <div class="text-2xl font-extrabold text-green-600">+{{ earned_total }}</div>
         <p class="text-gray-400 text-xs mt-1">from tasks &amp; bonuses</p>
     </div>
-    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+    <div class="card-hover bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
         <p class="text-gray-400 text-xs mb-1">Referral Bonuses</p>
         <div class="text-2xl font-extrabold text-brand-700">+{{ referral_bonus_total }}</div>
         <p class="text-gray-400 text-xs mt-1"><a href="/referral" class="text-brand-700 hover:underline">{{ referral_count }} referral{{ 's' if referral_count != 1 }}</a></p>
@@ -41,16 +63,16 @@
 
 <!-- Transaction history -->
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-    <div class="flex justify-between items-center mb-4">
-        <h2 class="font-bold text-gray-700">Transaction History</h2>
-        <span class="text-xs text-gray-400">Last 50 entries</span>
+    <div class="flex justify-between items-center mb-5">
+        <h2 class="font-bold text-gray-800">Transaction History</h2>
+        <span class="text-xs text-gray-400 bg-gray-50 border border-gray-100 px-3 py-1 rounded-full">Last 50 entries</span>
     </div>
     {% if history %}
     <div class="divide-y divide-gray-50">
         {% for entry in history %}
-        <div class="flex items-center justify-between py-3">
+        <div class="flex items-center justify-between py-3.5">
             <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0
+                <div class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold
                     {% if entry.transaction_type == 'earned' %}bg-green-100 text-green-600
                     {% elif entry.transaction_type == 'bonus' %}bg-brand-100 text-brand-700
                     {% elif entry.transaction_type == 'redeemed' %}bg-red-100 text-red-500
@@ -73,15 +95,19 @@
                 <span class="font-bold text-sm {% if entry.points > 0 %}text-green-600{% else %}text-red-500{% endif %}">
                     {% if entry.points > 0 %}+{% endif %}{{ entry.points }} pts
                 </span>
-                <p class="text-xs text-gray-400">Bal: {{ entry.balance_after }}</p>
+                <p class="text-xs text-gray-400 mt-0.5">Bal: {{ entry.balance_after }}</p>
             </div>
         </div>
         {% endfor %}
     </div>
     {% else %}
-    <div class="text-center py-12 text-gray-400">
-        <div class="text-4xl mb-3">💰</div>
-        <p class="text-sm">No transactions yet. Complete prompts to earn points!</p>
+    <div class="text-center py-16 text-gray-400">
+        <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-3">
+            <span class="text-3xl">💰</span>
+        </div>
+        <p class="text-sm font-medium text-gray-600">No transactions yet</p>
+        <p class="text-xs mt-1">Complete prompts to earn your first points!</p>
+        <a href="/dashboard" class="inline-block mt-4 bg-gradient-to-r from-brand-700 to-cyan-500 text-white px-5 py-2 rounded-xl text-sm font-semibold hover:opacity-90 transition">View Prompts →</a>
     </div>
     {% endif %}
 </div>

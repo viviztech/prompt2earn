@@ -1,93 +1,115 @@
 {% extends "base.html" %}
 {% block title %}Profile — PromptEarn{% endblock %}
+{% block extra_head %}
+<style>
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+    .float-anim { animation: float 3s ease-in-out infinite; }
+    .card-hover { transition: transform 0.2s, box-shadow 0.2s; }
+    .card-hover:hover { transform: translateY(-3px); box-shadow: 0 12px 24px rgba(124,58,237,0.12); }
+    .gradient-text { background: linear-gradient(135deg,#7c3aed,#06b6d4); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .ai-grid { background-image: radial-gradient(rgba(124,58,237,0.06) 1px, transparent 1px); background-size: 24px 24px; }
+</style>
+{% endblock %}
 {% block content %}
+
+<!-- Header -->
+<div class="ai-grid relative overflow-hidden bg-gradient-to-br from-slate-950 via-purple-950 to-slate-900 text-white py-8 px-6 -mx-4 sm:-mx-6 lg:-mx-8 mb-6 rounded-b-3xl">
+    <div class="absolute top-4 right-16 w-2 h-2 bg-cyan-400 rounded-full float-anim opacity-40" style="animation-delay:.8s"></div>
+    <div class="absolute bottom-4 left-1/4 w-1.5 h-1.5 bg-pink-400 rounded-full float-anim opacity-50" style="animation-delay:.4s"></div>
+    <div class="relative flex items-center gap-4">
+        <div class="w-14 h-14 bg-gradient-to-br from-brand-700 to-cyan-500 rounded-2xl flex items-center justify-center text-2xl font-bold text-white shadow-lg flex-shrink-0">
+            {{ user.full_name[0].upper() if user.full_name else 'U' }}
+        </div>
+        <div>
+            <h1 class="text-xl font-bold text-white">{{ user.full_name }}</h1>
+            <p class="text-purple-300 text-sm">Member since {{ user.created_at.strftime('%B %Y') }}</p>
+        </div>
+    </div>
+</div>
+
 <div class="max-w-2xl mx-auto">
-    <h1 class="text-2xl font-bold text-gray-800 mb-6">My Profile</h1>
 
-    {% if request.query_params.get('updated') %}
-    <div class="bg-green-50 border border-green-200 text-green-700 rounded-xl px-5 py-3 mb-6 text-sm font-medium">
-        ✅ Profile updated successfully.
+{% if request.query_params.get('updated') %}
+<div class="bg-green-50 border border-green-200 text-green-700 rounded-xl px-5 py-3 mb-6 text-sm font-medium flex items-center gap-2">
+    <span>✅</span> Profile updated successfully.
+</div>
+{% endif %}
+
+<!-- Stats Row -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+    <div class="card-hover bg-gradient-to-br from-brand-700 to-purple-900 rounded-xl p-4 shadow-sm text-center text-white">
+        <div class="text-2xl font-bold">{{ balance }}</div>
+        <div class="text-xs text-purple-200 mt-1">Points Balance</div>
     </div>
-    {% endif %}
-
-    <!-- Stats Row -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center">
-            <div class="text-2xl font-bold text-brand-700">{{ balance }}</div>
-            <div class="text-xs text-gray-500 mt-1">Points Balance</div>
-        </div>
-        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center">
-            <div class="text-2xl font-bold text-green-600">{{ approved_submissions }}</div>
-            <div class="text-xs text-gray-500 mt-1">Approved</div>
-        </div>
-        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center">
-            <div class="text-2xl font-bold text-orange-500">🔥 {{ user.current_streak or 0 }}</div>
-            <div class="text-xs text-gray-500 mt-1">Day Streak</div>
-        </div>
-        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center">
-            <div class="text-2xl font-bold text-purple-600">{{ referral_count }}</div>
-            <div class="text-xs text-gray-500 mt-1">Referrals</div>
-        </div>
+    <div class="card-hover bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center">
+        <div class="text-2xl font-bold text-green-600">{{ approved_submissions }}</div>
+        <div class="text-xs text-gray-500 mt-1">Approved</div>
     </div>
+    <div class="card-hover bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center">
+        <div class="text-2xl font-bold text-orange-500">🔥 {{ user.current_streak or 0 }}</div>
+        <div class="text-xs text-gray-500 mt-1">Day Streak</div>
+    </div>
+    <div class="card-hover bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center">
+        <div class="text-2xl font-bold text-purple-600">{{ referral_count }}</div>
+        <div class="text-xs text-gray-500 mt-1">Referrals</div>
+    </div>
+</div>
 
-    <!-- Subscription Card -->
-    <div class="bg-gradient-to-br from-brand-700 to-purple-900 text-white rounded-2xl p-5 mb-6">
-        <div class="flex justify-between items-start">
-            <div>
-                <p class="text-purple-200 text-xs font-medium uppercase tracking-wide mb-1">Current Plan</p>
-                <div class="text-xl font-bold">{{ active_sub.plan.display_name if active_sub else 'No Active Plan' }}</div>
-                {% if active_sub %}
-                <p class="text-purple-300 text-sm mt-1">Expires {{ active_sub.expires_at.strftime('%b %d, %Y') }}</p>
-                {% else %}
-                <p class="text-purple-300 text-sm mt-1">Subscribe to start earning</p>
-                {% endif %}
-            </div>
-            {% if not active_sub %}
-            <a href="/subscriptions/plans" class="bg-white text-brand-700 px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-100 transition">Subscribe</a>
+<!-- Subscription Card -->
+<div class="bg-gradient-to-br from-brand-700 to-purple-900 text-white rounded-2xl p-5 mb-6">
+    <div class="flex justify-between items-start">
+        <div>
+            <p class="text-purple-200 text-xs font-medium uppercase tracking-wide mb-1">Current Plan</p>
+            <div class="text-xl font-bold">{{ active_sub.plan.display_name if active_sub else 'No Active Plan' }}</div>
+            {% if active_sub %}
+            <p class="text-purple-300 text-sm mt-1">Expires {{ active_sub.expires_at.strftime('%b %d, %Y') }}</p>
             {% else %}
-            <a href="/subscriptions/plans" class="border border-purple-400 text-purple-200 px-3 py-1.5 rounded-lg text-xs hover:bg-white hover:text-brand-700 transition">Upgrade</a>
+            <p class="text-purple-300 text-sm mt-1">Subscribe to start earning cash</p>
             {% endif %}
         </div>
+        {% if not active_sub %}
+        <a href="/subscriptions/plans" class="bg-white text-brand-700 px-4 py-2 rounded-xl text-sm font-bold hover:bg-gray-100 transition">Subscribe →</a>
+        {% else %}
+        <a href="/subscriptions/plans" class="border border-purple-400 text-purple-200 px-3 py-1.5 rounded-xl text-xs hover:bg-white/10 transition">Upgrade</a>
+        {% endif %}
     </div>
+</div>
 
-    <!-- Edit Profile -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
-        <div class="flex items-center gap-4 mb-5">
-            <div class="w-14 h-14 bg-brand-700 rounded-full flex items-center justify-center text-2xl font-bold text-white">
-                {{ user.full_name[0].upper() if user.full_name else 'U' }}
-            </div>
-            <div>
-                <h2 class="font-bold text-gray-800 text-lg">{{ user.full_name }}</h2>
-                <p class="text-gray-500 text-sm">{{ user.email }}</p>
-                <p class="text-xs text-gray-400 mt-0.5">Member since {{ user.created_at.strftime('%B %Y') }}</p>
-            </div>
+<!-- Edit Profile -->
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+    <h2 class="font-bold text-gray-800 mb-5">Edit Profile</h2>
+    <form method="post" action="/profile/update" class="space-y-4">
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+            <input type="text" name="full_name" value="{{ user.full_name or '' }}" required
+                class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-700 bg-gray-50">
         </div>
-
-        <form method="post" action="/profile/update" class="space-y-4">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                <input type="text" name="full_name" value="{{ user.full_name or '' }}" required
-                    class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-700">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                <input type="tel" name="phone" value="{{ user.phone or '' }}"
-                    class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-700">
-            </div>
-            <button type="submit" class="bg-brand-700 text-white px-6 py-2.5 rounded-lg font-semibold text-sm hover:bg-brand-800 transition">Save Changes</button>
-        </form>
-    </div>
-
-    <!-- Referral Code -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <h2 class="font-bold text-gray-800 mb-3">Your Referral Code</h2>
-        <div class="flex items-center gap-3">
-            <div class="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 font-mono text-brand-700 font-bold tracking-widest text-lg">
-                {{ user.referral_code or '—' }}
-            </div>
-            <a href="/referral" class="bg-brand-700 text-white px-4 py-3 rounded-lg text-sm font-semibold hover:bg-brand-800 transition whitespace-nowrap">Share & Earn</a>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <input type="email" value="{{ user.email }}" disabled
+                class="w-full border border-gray-100 rounded-xl px-4 py-3 text-sm bg-gray-50 text-gray-400 cursor-not-allowed">
+            <p class="text-xs text-gray-400 mt-1">Email cannot be changed</p>
         </div>
-        <p class="text-xs text-gray-400 mt-2">Share your referral code — earn bonus points when friends subscribe.</p>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+            <input type="tel" name="phone" value="{{ user.phone or '' }}"
+                class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-700 bg-gray-50">
+        </div>
+        <button type="submit" class="bg-gradient-to-r from-brand-700 to-purple-800 text-white px-6 py-2.5 rounded-xl font-semibold text-sm hover:opacity-90 transition">Save Changes</button>
+    </form>
+</div>
+
+<!-- Referral Code -->
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+    <h2 class="font-bold text-gray-800 mb-1">Your Referral Code</h2>
+    <p class="text-xs text-gray-400 mb-3">Share your code — earn bonus points when friends subscribe.</p>
+    <div class="flex items-center gap-3">
+        <div class="flex-1 bg-gradient-to-r from-brand-50 to-cyan-50 border border-brand-200 rounded-xl px-4 py-3 font-mono text-brand-700 font-bold tracking-widest text-lg">
+            {{ user.referral_code or '—' }}
+        </div>
+        <a href="/referral" class="bg-brand-700 text-white px-4 py-3 rounded-xl text-sm font-semibold hover:bg-brand-800 transition whitespace-nowrap">Share &amp; Earn →</a>
     </div>
+</div>
+
 </div>
 {% endblock %}

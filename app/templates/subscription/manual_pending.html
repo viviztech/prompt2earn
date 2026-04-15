@@ -1,40 +1,93 @@
 {% extends "base.html" %}
 {% block title %}Payment Under Review — PromptEarn{% endblock %}
+{% block extra_head %}
+<style>
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+    @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+    @keyframes pulse-soft { 0%,100%{opacity:1} 50%{opacity:0.5} }
+    .float-anim { animation: float 3s ease-in-out infinite; }
+    .shimmer-btn { background: linear-gradient(90deg,#7c3aed,#06b6d4,#7c3aed); background-size:200% auto; animation: shimmer 2.5s linear infinite; }
+    .pulse-soft { animation: pulse-soft 2s ease-in-out infinite; }
+    .ai-grid { background-image: radial-gradient(rgba(124,58,237,0.08) 1px, transparent 1px); background-size: 24px 24px; }
+</style>
+{% endblock %}
 {% block content %}
-<div class="max-w-md mx-auto text-center py-16">
-    <div class="text-6xl mb-6">⏳</div>
-    <h1 class="text-2xl font-bold text-gray-800 mb-3">Payment Under Review</h1>
-    <p class="text-gray-500 mb-6 text-sm">Your payment proof has been submitted. Admin will verify and activate your account within <strong>24 hours</strong>.</p>
+<div class="ai-grid relative overflow-hidden bg-gradient-to-br from-slate-950 via-purple-950 to-slate-900 min-h-screen text-white -mx-4 sm:-mx-6 lg:-mx-8 -mt-6 flex items-center justify-center py-20 px-4">
+    <div class="absolute top-16 left-16 w-2 h-2 bg-purple-400 rounded-full float-anim opacity-60"></div>
+    <div class="absolute top-24 right-20 w-3 h-3 bg-cyan-400 rounded-full float-anim opacity-40" style="animation-delay:.8s"></div>
+    <div class="absolute bottom-20 left-1/4 w-2 h-2 bg-yellow-400 rounded-full float-anim opacity-50" style="animation-delay:.4s"></div>
 
-    {% if transaction %}
-    <div class="bg-gray-50 rounded-xl border border-gray-200 p-5 text-left text-sm mb-6 space-y-2">
-        <div class="flex justify-between"><span class="text-gray-500">Transaction ID</span><span class="font-mono font-medium">{{ transaction.manual_transaction_id }}</span></div>
-        <div class="flex justify-between"><span class="text-gray-500">Amount</span><span class="font-medium">₹{{ transaction.amount_inr | int }}</span></div>
-        <div class="flex justify-between"><span class="text-gray-500">Submitted</span><span>{{ transaction.created_at.strftime('%b %d, %Y %I:%M %p') }}</span></div>
-        <div class="flex justify-between"><span class="text-gray-500">Status</span>
-            <span class="capitalize text-xs px-2 py-1 rounded-full font-medium
-                {% if transaction.status == 'paid' %}bg-green-100 text-green-700
-                {% elif transaction.status == 'rejected' %}bg-red-100 text-red-700
-                {% else %}bg-yellow-100 text-yellow-700{% endif %}">
-                {% if transaction.status == 'pending_verification' %}Pending Review
-                {% elif transaction.status == 'paid' %}Approved ✓
-                {% else %}{{ transaction.status | title }}{% endif %}
-            </span>
+    <div class="relative text-center max-w-md mx-auto">
+        {% if transaction and transaction.status == 'paid' %}
+        <!-- Approved -->
+        <div class="w-24 h-24 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-green-500/30 float-anim">
+            <span class="text-5xl">✅</span>
         </div>
-        {% if transaction.admin_note and transaction.status == 'rejected' %}
-        <div class="pt-2 border-t border-gray-200">
-            <p class="text-red-600 text-xs"><strong>Reason:</strong> {{ transaction.admin_note }}</p>
+        <h1 class="text-3xl font-extrabold mb-2">Payment Approved!</h1>
+        <p class="text-purple-300 text-sm mb-8">Your plan is now active. Start earning today!</p>
+        {% elif transaction and transaction.status == 'rejected' %}
+        <!-- Rejected -->
+        <div class="w-24 h-24 bg-gradient-to-br from-red-400 to-red-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-red-500/30 float-anim">
+            <span class="text-5xl">❌</span>
+        </div>
+        <h1 class="text-3xl font-extrabold mb-2">Payment Rejected</h1>
+        <p class="text-purple-300 text-sm mb-8">Sorry, we couldn't verify your payment. Please try again or contact support.</p>
+        {% else %}
+        <!-- Pending -->
+        <div class="w-24 h-24 bg-gradient-to-br from-yellow-400 to-orange-400 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-yellow-500/30">
+            <span class="text-5xl pulse-soft">⏳</span>
+        </div>
+        <div class="inline-flex items-center gap-2 bg-white/10 border border-white/20 px-4 py-1.5 rounded-full text-yellow-300 text-xs font-semibold mb-4">
+            <span class="w-2 h-2 bg-yellow-400 rounded-full pulse-soft"></span>
+            Under Review
+        </div>
+        <h1 class="text-3xl font-extrabold mb-2">Payment Under Review</h1>
+        <p class="text-purple-300 text-sm mb-8">Your payment proof has been submitted. Admin will verify and activate your account within <strong class="text-white">24 hours</strong>.</p>
+        {% endif %}
+
+        {% if transaction %}
+        <div class="bg-white/10 border border-white/20 rounded-2xl p-5 text-left text-sm mb-8 space-y-3">
+            <div class="flex justify-between items-center">
+                <span class="text-purple-300">Transaction ID</span>
+                <span class="font-mono font-medium text-white">{{ transaction.manual_transaction_id }}</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-purple-300">Amount</span>
+                <span class="font-bold text-white text-base">₹{{ transaction.amount_inr | int }}</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-purple-300">Submitted</span>
+                <span class="text-white">{{ transaction.created_at.strftime('%b %d, %Y %I:%M %p') }}</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-purple-300">Status</span>
+                <span class="capitalize text-xs px-3 py-1 rounded-full font-semibold
+                    {% if transaction.status == 'paid' %}bg-green-500/20 text-green-400 border border-green-500/30
+                    {% elif transaction.status == 'rejected' %}bg-red-500/20 text-red-400 border border-red-500/30
+                    {% else %}bg-yellow-500/20 text-yellow-400 border border-yellow-500/30{% endif %}">
+                    {% if transaction.status == 'pending_verification' %}Pending Review
+                    {% elif transaction.status == 'paid' %}Approved ✓
+                    {% else %}{{ transaction.status | title }}{% endif %}
+                </span>
+            </div>
+            {% if transaction.admin_note and transaction.status == 'rejected' %}
+            <div class="pt-2 border-t border-white/10">
+                <p class="text-red-400 text-xs"><strong>Reason:</strong> {{ transaction.admin_note }}</p>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% if transaction and transaction.status == 'paid' %}
+        <a href="/dashboard" class="shimmer-btn text-white px-8 py-3 rounded-xl font-bold hover:opacity-90 transition inline-block">Start Earning Now →</a>
+        {% elif transaction and transaction.status == 'rejected' %}
+        <a href="/subscriptions/plans" class="shimmer-btn text-white px-8 py-3 rounded-xl font-bold hover:opacity-90 transition inline-block">Try Again →</a>
+        {% else %}
+        <div class="space-y-3">
+            <p class="text-xs text-purple-400">We'll notify you via email once your payment is verified.</p>
+            <a href="/dashboard" class="inline-block border border-white/30 text-white px-8 py-3 rounded-xl font-semibold hover:bg-white/10 transition">Back to Home</a>
         </div>
         {% endif %}
     </div>
-    {% endif %}
-
-    {% if transaction and transaction.status == 'paid' %}
-    <a href="/dashboard" class="bg-brand-700 text-white px-8 py-3 rounded-xl font-bold hover:bg-brand-800 transition">Go to Dashboard →</a>
-    {% elif transaction and transaction.status == 'rejected' %}
-    <a href="/subscriptions/plans" class="bg-brand-700 text-white px-8 py-3 rounded-xl font-bold hover:bg-brand-800 transition">Try Again →</a>
-    {% else %}
-    <a href="/dashboard" class="bg-gray-100 text-gray-700 px-8 py-3 rounded-xl font-semibold hover:bg-gray-200 transition">Back to Home</a>
-    {% endif %}
 </div>
 {% endblock %}

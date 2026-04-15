@@ -1,76 +1,111 @@
 {% extends "base.html" %}
 {% block title %}{{ prompt.title }} — PromptEarn{% endblock %}
+{% block extra_head %}
+<style>
+    @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+    .float-anim { animation: float 3s ease-in-out infinite; }
+    .shimmer-bar { background: linear-gradient(90deg,#7c3aed,#06b6d4,#7c3aed); background-size:200% auto; animation: shimmer 2.5s linear infinite; }
+    .gradient-text { background: linear-gradient(135deg,#7c3aed,#06b6d4); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .ai-grid { background-image: radial-gradient(rgba(124,58,237,0.06) 1px, transparent 1px); background-size: 24px 24px; }
+    .drop-zone-active { border-color: #7c3aed; background: #faf5ff; }
+</style>
+{% endblock %}
 {% block content %}
 <div class="max-w-2xl mx-auto">
-    <a href="/dashboard" class="text-sm text-brand-700 hover:underline mb-4 inline-block">← Back to Dashboard</a>
+    <a href="/dashboard" class="inline-flex items-center gap-1 text-sm text-brand-700 hover:text-brand-800 mb-4 font-medium">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        Back to Dashboard
+    </a>
 
+    <!-- Prompt card -->
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
-        <div class="flex items-center gap-2 mb-4">
-            <span class="text-xs font-semibold px-2 py-1 rounded-full bg-brand-100 text-brand-700">{{ prompt.category.display_name }}</span>
-            <span class="text-brand-700 font-bold">+{{ prompt.point_value }} points</span>
+        <div class="flex items-center gap-2 mb-4 flex-wrap">
+            <span class="text-xs font-semibold px-2.5 py-1 rounded-full
+                {% if prompt.category.name == 'poster' %}bg-pink-100 text-pink-700
+                {% elif prompt.category.name == 'video' %}bg-blue-100 text-blue-700
+                {% elif prompt.category.name == 'audio' %}bg-yellow-100 text-yellow-700
+                {% else %}bg-green-100 text-green-700{% endif %}">
+                {{ prompt.category.display_name }}
+            </span>
+            {% if prompt.is_sponsored %}
+            <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">🏷️ Sponsored</span>
+            {% endif %}
+            <span class="ml-auto gradient-text font-bold text-sm">+{{ prompt.point_value }} points</span>
         </div>
-        <h1 class="text-2xl font-bold text-gray-800 mb-3">{{ prompt.title }}</h1>
-        <div class="text-gray-600 text-sm leading-relaxed mb-4 whitespace-pre-wrap">{{ prompt.description }}</div>
-        <div class="bg-gray-50 rounded-lg p-3 text-sm text-gray-500">
-            <strong>Deadline:</strong> {{ prompt.deadline.strftime('%B %d, %Y at %I:%M %p UTC') }}
+        <h1 class="text-xl font-bold text-gray-800 mb-3">{{ prompt.title }}</h1>
+        <div class="text-gray-600 text-sm leading-relaxed mb-4 whitespace-pre-wrap bg-gray-50 rounded-xl p-4 border border-gray-100">{{ prompt.description }}</div>
+        <div class="flex items-center gap-2 text-xs text-gray-400 bg-gray-50 rounded-lg px-3 py-2">
+            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <strong>Deadline:</strong>&nbsp;{{ prompt.deadline.strftime('%B %d, %Y at %I:%M %p UTC') }}
         </div>
     </div>
 
     {% if request.query_params.get('submitted') %}
-    <div class="bg-green-50 border border-green-200 text-green-700 rounded-xl px-5 py-4 mb-6 text-sm font-medium">
-        ✅ Submission received! Admin will review it soon. You'll get an email when approved.
+    <div class="bg-green-50 border border-green-200 text-green-700 rounded-xl px-5 py-4 mb-6 text-sm font-medium flex items-center gap-2">
+        <span class="text-lg">✅</span>
+        <span>Submission received! Admin will review it soon. You'll get an email when approved.</span>
     </div>
     {% endif %}
 
     {% if existing_submission %}
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 text-center">
-        <div class="text-4xl mb-3">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center">
+        <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 text-3xl
+            {% if existing_submission.status == 'approved' %}bg-green-100
+            {% elif existing_submission.status == 'rejected' %}bg-red-100
+            {% else %}bg-yellow-100{% endif %}">
             {% if existing_submission.status == 'approved' %}✅
             {% elif existing_submission.status == 'rejected' %}❌
             {% else %}⏳{% endif %}
         </div>
-        <h2 class="font-bold text-gray-800 mb-1 capitalize">Submission {{ existing_submission.status }}</h2>
+        <h2 class="font-bold text-gray-800 mb-2 capitalize text-lg">Submission {{ existing_submission.status }}</h2>
         {% if existing_submission.status == 'approved' %}
-        <p class="text-green-600 text-sm font-semibold">You earned {{ existing_submission.points_awarded }} points!</p>
+        <p class="text-green-600 text-sm font-semibold">🎉 You earned <strong>{{ existing_submission.points_awarded }} points</strong>!</p>
         {% elif existing_submission.status == 'rejected' %}
         <p class="text-red-600 text-sm">{{ existing_submission.review_note or 'Submission did not meet requirements.' }}</p>
         {% else %}
-        <p class="text-gray-500 text-sm">Under review. We'll notify you by email.</p>
+        <p class="text-gray-500 text-sm">Under review. We'll notify you by email once approved.</p>
         {% endif %}
     </div>
 
     {% elif is_locked_to_other %}
-    <div class="bg-orange-50 border border-orange-200 text-orange-700 rounded-xl px-5 py-4 text-sm text-center">
-        <div class="text-2xl mb-2">🔒</div>
-        <p class="font-semibold">This prompt has been taken by another user.</p>
+    <div class="bg-orange-50 border border-orange-200 text-orange-700 rounded-xl px-5 py-6 text-sm text-center">
+        <div class="text-3xl mb-2">🔒</div>
+        <p class="font-semibold text-base">Prompt taken by another user</p>
         <p class="text-xs mt-1 text-orange-500">Check the dashboard for other available prompts.</p>
+        <a href="/dashboard" class="inline-block mt-4 bg-orange-500 text-white px-5 py-2 rounded-xl text-sm font-semibold hover:opacity-90 transition">View Other Prompts →</a>
     </div>
 
     {% elif is_past_deadline %}
-    <div class="bg-red-50 border border-red-200 text-red-700 rounded-xl px-5 py-4 text-sm text-center">
-        This prompt has passed its deadline and is no longer accepting submissions.
+    <div class="bg-red-50 border border-red-200 text-red-700 rounded-xl px-5 py-6 text-sm text-center">
+        <div class="text-3xl mb-2">⏰</div>
+        <p class="font-semibold">This prompt has passed its deadline</p>
+        <p class="text-xs mt-1">No longer accepting submissions.</p>
+        <a href="/dashboard" class="inline-block mt-4 bg-red-500 text-white px-5 py-2 rounded-xl text-sm font-semibold hover:opacity-90 transition">Back to Dashboard →</a>
     </div>
 
     {% else %}
     <!-- Upload Form -->
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <h2 class="font-bold text-gray-800 mb-4 text-lg">Upload Your Work</h2>
-        <div id="upload-area" class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer hover:border-brand-700 transition mb-4">
-            <div class="text-4xl mb-2">📁</div>
-            <p class="text-gray-500 text-sm mb-1">Click or drag file here</p>
-            <p class="text-gray-400 text-xs">
-                Allowed: {{ prompt.category.allowed_file_types | join(', ') }} — Max {{ prompt.category.max_file_size_mb }}MB
-            </p>
+        <h2 class="font-bold text-gray-800 mb-1 text-lg">Upload Your Work</h2>
+        <p class="text-xs text-gray-400 mb-4">Allowed: {{ prompt.category.allowed_file_types | join(', ') }} — Max {{ prompt.category.max_file_size_mb }}MB</p>
+
+        <div id="upload-area" class="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center cursor-pointer hover:border-brand-700 hover:bg-brand-50/30 transition mb-4">
+            <div class="w-12 h-12 bg-gradient-to-br from-brand-100 to-cyan-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+                <span class="text-2xl">📁</span>
+            </div>
+            <p class="text-gray-600 text-sm font-medium mb-1">Click or drag file here</p>
+            <p class="text-gray-400 text-xs">{{ prompt.category.allowed_file_types | join(', ') | upper }} — Max {{ prompt.category.max_file_size_mb }}MB</p>
             <input type="file" id="file-input" class="hidden">
         </div>
 
         <div id="progress-area" class="hidden mb-4">
-            <div class="flex justify-between text-sm mb-1">
-                <span id="file-name" class="text-gray-600 truncate"></span>
-                <span id="progress-text" class="text-brand-700 font-semibold">0%</span>
+            <div class="flex justify-between text-sm mb-1.5">
+                <span id="file-name" class="text-gray-600 truncate text-xs"></span>
+                <span id="progress-text" class="text-brand-700 font-semibold text-xs">0%</span>
             </div>
-            <div class="w-full bg-gray-200 rounded-full h-2">
-                <div id="progress-bar" class="bg-brand-700 h-2 rounded-full transition-all" style="width: 0%"></div>
+            <div class="w-full bg-gray-100 rounded-full h-2">
+                <div id="progress-bar" class="shimmer-bar h-2 rounded-full transition-all" style="width: 0%"></div>
             </div>
         </div>
 
@@ -81,10 +116,10 @@
             <input type="hidden" name="file_size" id="file_size">
         </form>
 
-        <button id="upload-btn" class="w-full bg-brand-700 text-white py-3 rounded-xl font-semibold hover:bg-brand-800 transition hidden" onclick="submitWork()">
-            Submit Work
+        <button id="upload-btn" class="w-full bg-gradient-to-r from-brand-700 to-purple-800 text-white py-3 rounded-xl font-bold hover:opacity-90 transition hidden" onclick="submitWork()">
+            Submit Work →
         </button>
-        <div id="error-msg" class="text-red-600 text-sm mt-2 hidden"></div>
+        <div id="error-msg" class="text-red-600 text-sm mt-2 hidden bg-red-50 border border-red-200 rounded-xl px-4 py-3"></div>
     </div>
     {% endif %}
 </div>
@@ -92,17 +127,28 @@
 {% block scripts %}
 <script>
 const promptId = "{{ prompt.id }}";
-let uploadedKey = null;
 let selectedFile = null;
 
-document.getElementById('upload-area').onclick = () => document.getElementById('file-input').click();
-document.getElementById('file-input').onchange = (e) => {
-    selectedFile = e.target.files[0];
-    if (!selectedFile) return;
-    document.getElementById('file-name').textContent = selectedFile.name;
+const uploadArea = document.getElementById('upload-area');
+const fileInput = document.getElementById('file-input');
+
+uploadArea.onclick = () => fileInput.click();
+uploadArea.ondragover = (e) => { e.preventDefault(); uploadArea.classList.add('drop-zone-active'); };
+uploadArea.ondragleave = () => uploadArea.classList.remove('drop-zone-active');
+uploadArea.ondrop = (e) => {
+    e.preventDefault();
+    uploadArea.classList.remove('drop-zone-active');
+    if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+};
+fileInput.onchange = (e) => { if (e.target.files[0]) handleFile(e.target.files[0]); };
+
+function handleFile(file) {
+    selectedFile = file;
+    document.getElementById('file-name').textContent = file.name;
     document.getElementById('progress-area').classList.remove('hidden');
     document.getElementById('upload-btn').classList.remove('hidden');
-};
+    uploadArea.innerHTML = `<div class="text-2xl mb-2">📎</div><p class="text-brand-700 text-sm font-medium">${file.name}</p><p class="text-gray-400 text-xs mt-1">${(file.size / 1024 / 1024).toFixed(2)} MB</p>`;
+}
 
 async function submitWork() {
     if (!selectedFile) return;
@@ -114,11 +160,7 @@ async function submitWork() {
         const presignRes = await fetch('/api/upload/presign', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                prompt_id: promptId,
-                filename: selectedFile.name,
-                content_type: selectedFile.type
-            })
+            body: JSON.stringify({ prompt_id: promptId, filename: selectedFile.name, content_type: selectedFile.type })
         });
         if (!presignRes.ok) {
             const err = await presignRes.json();
@@ -130,6 +172,9 @@ async function submitWork() {
         Object.entries(fields).forEach(([k, v]) => formData.append(k, v));
         formData.append('file', selectedFile);
 
+        document.getElementById('progress-bar').style.width = '50%';
+        document.getElementById('progress-text').textContent = '50%';
+
         let uploadRes;
         try {
             uploadRes = await fetch(url, {method: 'POST', body: formData});
@@ -140,6 +185,7 @@ async function submitWork() {
 
         document.getElementById('progress-bar').style.width = '100%';
         document.getElementById('progress-text').textContent = '100%';
+        btn.textContent = 'Submitting...';
 
         document.getElementById('s3_key').value = key;
         document.getElementById('original_filename').value = selectedFile.name;
@@ -147,10 +193,11 @@ async function submitWork() {
         document.getElementById('file_size').value = selectedFile.size;
         document.getElementById('submit-form').submit();
     } catch(e) {
-        document.getElementById('error-msg').textContent = e.message;
-        document.getElementById('error-msg').classList.remove('hidden');
+        const errEl = document.getElementById('error-msg');
+        errEl.textContent = e.message;
+        errEl.classList.remove('hidden');
         btn.disabled = false;
-        btn.textContent = 'Submit Work';
+        btn.textContent = 'Submit Work →';
     }
 }
 </script>
